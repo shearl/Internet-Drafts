@@ -1,0 +1,504 @@
+
+
+
+Network Working Group                                          K. Morgan
+Internet-Draft                                              C. Brunhuber
+Intended status: Standards Track                                    IAEA
+Expires: October 20, 2014                                 April 18, 2014
+
+
+                         HTTP Message-Encoding
+                 draft-morgan-http-message-encoding-00
+
+Abstract
+
+   Compression of Hypertext Transfer Protocol (HTTP) message content is
+   typically accomplished with Content-Encoding.  However, there are
+   some use cases where Content-Encoding cannot (or event should not) be
+   used e.g. dynamic compression of a range, etc.  The HTTP Transfer-
+   Encoding mechanism suits these cases quite well, but in light of
+   recent security vulnerabilities (e.g.  BREACH [BREACH]) which exploit
+   compression, Transfer-Encoding is eschewed because its hop-to-hop
+   nature allows blanket compression by intermediaries which likely lack
+   the proper context for deciding if it is safe to compress.  This
+   document introduces Message-Encoding, an analogue to Transfer-
+   Encoding, but with end-to-end encoding and strict transformation
+   rules related to intermediaries.
+
+   This document is an extension to, but does not obsolete, the HTTP/1.1
+   message syntax.  HTTP's existing semantics remain unchanged.
+
+   This document should be discussed on the ietf-http-wg@w3.org mailing
+   list, although it is not a work item of the HTTPbis WG.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on October 20, 2014.
+
+Copyright Notice
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 1]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+   Copyright (c) 2014 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . . . 3
+   2.  Conventions and Terminology . . . . . . . . . . . . . . . . . . 3
+   3.  Syntax Notation . . . . . . . . . . . . . . . . . . . . . . . . 3
+   4.  Message Body  . . . . . . . . . . . . . . . . . . . . . . . . . 3
+   5.  Message-Encoding  . . . . . . . . . . . . . . . . . . . . . . . 4
+     5.1.  Intermediaries  . . . . . . . . . . . . . . . . . . . . . . 5
+   6.  Message Codings . . . . . . . . . . . . . . . . . . . . . . . . 5
+   7.  Compression Codings . . . . . . . . . . . . . . . . . . . . . . 6
+     7.1.  Compress Coding . . . . . . . . . . . . . . . . . . . . . . 6
+     7.2.  Deflate Coding  . . . . . . . . . . . . . . . . . . . . . . 6
+     7.3.  Gzip Coding . . . . . . . . . . . . . . . . . . . . . . . . 6
+   8.  ME  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+   9.  Message Coding Registry . . . . . . . . . . . . . . . . . . . . 7
+     9.1.  Procedure . . . . . . . . . . . . . . . . . . . . . . . . . 7
+     9.2.  Registration  . . . . . . . . . . . . . . . . . . . . . . . 7
+   10. Security Considerations . . . . . . . . . . . . . . . . . . . . 8
+   11. IANA Considerations . . . . . . . . . . . . . . . . . . . . . . 8
+   12. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . 8
+   13. References  . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+     13.1. Normative References  . . . . . . . . . . . . . . . . . . . 8
+     13.2. Informative References  . . . . . . . . . . . . . . . . . . 9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 2]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+1.  Introduction
+
+   TBD
+
+2.  Conventions and Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [RFC2119].
+
+   The following terms are used:
+
+   client:  The endpoint initiating the HTTP connection.
+
+   connection:  A transport-level connection between two endpoints.
+
+   endpoint:  Either the client or server of the connection.
+
+   intermediary:  A "proxy", "gateway" or other intermediary as defined
+      in Section 2.3 of [HTTP-p1].
+
+   peer:  An endpoint.  When discussing a particular endpoint, "peer"
+      refers to the endpoint that is remote to the primary subject of
+      discussion.
+
+   server:  The endpoint which did not initiate the HTTP connection.
+
+3.  Syntax Notation
+
+   This document uses the same syntax notation as defined in Section 1.2
+   of [HTTP-p1].
+
+4.  Message Body
+
+   This document extends the definition of a message body (if any) of an
+   HTTP message, which is used to carry the payload body of that request
+   or response.  The message body is identical to the payload body
+   unless transfer coding(s) have been applied, as described in Section
+   3.3.1 of [HTTP-p1], or message coding(s) have been applied, as
+   described in Section 5, or both.
+
+   The presence of a message body in a request is signaled by a Content-
+   Length (Section 3.3.2 of [HTTP-p1]), Transfer-Encoding (Section 3.3.1
+   of [HTTP-p1]) or Message-Encoding header field.
+
+
+
+
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 3]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+   A message body MAY contain both transfer coding(s) and message
+   coding(s).  For example,
+
+           Message-Encoding: gzip
+           Transfer-Encoding: chunked
+
+   indicates that the payload body has been compressed using the gzip
+   message coding and then chunked using the chunked transfer coding
+   while forming the message body.
+
+5.  Message-Encoding
+
+   The Message-Encoding header field lists the message coding names
+   corresponding to the sequence of message codings that have been (or
+   will be) applied to the payload body in order to form the message
+   body.  Message codings are defined in Section 6.
+
+           Message-Encoding = 1#message-coding
+
+   Multiple message codings MAY be applied to a message.  For example,
+
+           Message-Encoding: foo, gzip
+
+   indicates that the payload body has been encoded using the foo coding
+   and then compressed using the gzip coding while forming the message
+   body; where, for example, foo is a coding that increases the
+   compressibility of the message.
+
+   Message-Encoding is analogous to HTTP Transfer-Encoding (Section
+   3.3.1 of [HTTP-p1]).  The key difference between Message-Encoding and
+   Transfer-Encoding is that Message-Encoding is an end-to-end header
+   field while Transfer-Encoding is a hop-to-hop header field.  While
+   transfer codings may be added or removed by any intermediary in the
+   HTTP connection, intermediaries must follow the strict requirements
+   defined in Section 5.1 with respect to message codings.
+
+   All message coding(s), if any, MUST be applied before transfer
+   coding(s), if any.
+
+   Message-Encoding MAY be sent in a response to a HEAD request or in a
+   304 (Not Modified) response (Section 4.1 of [HTTP-p4]) to a GET
+   request, neither of which includes a message body, to indicate that
+   the origin server would have applied a message coding to the message
+   body if the request had been an unconditional GET.
+
+   A server MUST NOT send a Message-Encoding header field in any
+   response with a status code of 1xx (Informational) or 204 (No
+   Content).  A server MUST NOT send a Message-Encoding header field in
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 4]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+   any 2xx (Successful) response to a CONNECT request (Section 4.3.6 of
+   [HTTP-p2]).
+
+   As Message-Encoding is an HTTP extension, a client MUST NOT send a
+   request containing Message-Encoding unless it knows the server will
+   handle the specific message coding(s); such knowledge might be in the
+   form of specific user configuration or by remembering the codings of
+   a prior received response.  A server MUST NOT send a response
+   containing Message-Encoding unless the corresponding request
+   indicates support in a ME header field.
+
+   A server that receives a request message with a message coding it
+   does not understand SHOULD respond with 501 (Not Implemented).
+
+5.1.  Intermediaries
+
+   Intermediaries MUST NOT add message codings, however intermediaries
+   MAY remove message codings if necessary.  If desirable, an
+   intermediary MAY remove one or more message codings and later re-
+   encode the payload body (or a portion thereof e.g. range), but the
+   identical set of message codings MUST be applied in the same order as
+   the original message body was received.  For example, an intermediary
+   might choose to remove a gzip message coding (i.e. decompress) for
+   local storage so that ranges might be more easily extracted and
+   served.  In this case the intermediary could serve ranges from its
+   uncompressed local copy of the content either without a message
+   coding or with gzip message coding, but not with any other message
+   coding.
+
+6.  Message Codings
+
+   Message coding names are used to indicate an encoding transformation
+   that has been, can be, or might need to be applied to a payload body.
+   This differs from a content coding in that the message coding is a
+   property of the message rather than a property of the representation
+   that is being messagered.
+
+         message-coding = "compress" ; Section 7.1
+         / "deflate" ; Section 7.2
+         / "gzip" ; Section 7.3
+         / message-extension
+         message-extension = token *( OWS ";" OWS message-parameter )
+
+   Parameters are in the form of a name or name=value pair.
+
+         message-parameter = token BWS "=" BWS ( token / quoted-string )
+
+   All message-coding names are case-insensitive and ought to be
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 5]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+   registered within the HTTP Message Coding registry, as defined in
+   Section 9.  They are used in the ME (Section 8) and Message-Encoding
+   (Section 5) header fields.
+
+7.  Compression Codings
+
+   The codings defined below can be used to compress the payload of a
+   message.
+
+7.1.  Compress Coding
+
+   The "compress" coding is an adaptive Lempel-Ziv-Welch (LZW) coding
+   [Welch] that is commonly produced by the UNIX file compression
+   program "compress".  A recipient SHOULD consider "x-compress" to be
+   equivalent to "compress".
+
+7.2.  Deflate Coding
+
+   The "deflate" coding is a "zlib" data format [RFC1950] containing a
+   "deflate" compressed data stream [RFC1951] that uses a combination of
+   the Lempel-Ziv (LZ77) compression algorithm and Huffman coding.
+
+      Note: Some non-conformant implementations send the "deflate"
+      compressed data without the zlib wrapper.
+
+7.3.  Gzip Coding
+
+   The "gzip" coding is an LZ77 coding with a 32 bit CRC that is
+   commonly produced by the gzip file compression program [RFC1952].  A
+   recipient SHOULD consider "x-gzip" to be equivalent to "gzip".
+
+8.  ME
+
+   The "ME" header field in a request indicates what message codings the
+   client is willing to accept in a response.
+
+   The ME field-value consists of a comma-separated list of message
+   coding names, each allowing for optional parameters (as described in
+   Section 6).
+
+         ME        = #m-codings
+         m-codings = ( message-coding [ m-ranking ] )
+         m-ranking = OWS ";" OWS "q=" rank
+         rank      = ( "0" [ "." 0*3DIGIT ] )
+         / ( "1" [ "." 0*3("0") ] )
+
+   Three examples of ME use are below.
+
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 6]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+           ME: gzip
+           ME:
+           ME: gzip;q=0.5
+
+   When multiple message codings are acceptable, the client MAY rank the
+   codings by preference using a case-insensitive "q" parameter (similar
+   to the qvalues used in content negotiation fields, Section 5.3.1 of
+   [HTTP-p2]).  The rank value is a real number in the range 0 through
+   1, where 0.001 is the least preferred and 1 is the most preferred; a
+   value of 0 means "not acceptable".
+
+   If the ME field-value is empty or if no ME field is present, there
+   are no acceptable message codings.  A message with no message coding
+   is always acceptable.
+
+9.  Message Coding Registry
+
+   The HTTP Message Coding Registry defines the name space for message
+   coding names.  It is maintained at
+   <http://www.iana.org/assignments/http-parameters>.
+
+9.1.  Procedure
+
+   Registrations MUST include the following fields:
+
+   o  Name
+
+   o  Description
+
+   o  Pointer to specification text
+
+   Names of message codings MUST NOT overlap with names of content
+   codings (Section 3.1.2.1 of [HTTP-p2]) or transfer codings (Section 4
+   of [HTTP-p1]) unless the encoding transformation is identical, as is
+   the case for the compression codings defined in Section 7.
+
+   Values to be added to this name space require IETF Review (see
+   Section 4.1 of [RFC5226]), and MUST conform to the purpose of message
+   coding defined in this specification.
+
+   Use of program names for the identification of encoding formats is
+   not desirable and is discouraged for future encodings.
+
+9.2.  Registration
+
+   The HTTP Message Coding Registry shall be updated with the
+   registrations below:
+
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 7]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+   +------------+----------------------------------------+-------------+
+   | Name       | Description                            | Reference   |
+   +------------+----------------------------------------+-------------+
+   | compress   | UNIX "compress" data format [Welch]    | Section 7.1 |
+   | deflate    | "deflate" compressed data ([RFC1951])  | Section 7.2 |
+   |            | inside the "zlib" data format          |             |
+   |            | ([RFC1950])                            |             |
+   | gzip       | GZIP file format [RFC1952]             | Section 7.3 |
+   | x-compress | Deprecated (alias for compress)        | Section 7.1 |
+   | x-gzip     | Deprecated (alias for gzip)            | Section 7.3 |
+   +------------+----------------------------------------+-------------+
+
+10.  Security Considerations
+
+   TBD
+
+11.  IANA Considerations
+
+   TBD
+
+12.  Acknowledgements
+
+13.  References
+
+13.1.  Normative References
+
+   [HTTP-p1]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Message Syntax and Routing",
+              draft-ietf-httpbis-p1-messaging-26 (work in progress),
+              February 2014.
+
+   [HTTP-p2]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Semantics and Content",
+              draft-ietf-httpbis-p2-semantics-26 (work in progress),
+              February 2014.
+
+   [HTTP-p4]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Conditional Requests",
+              draft-ietf-httpbis-p4-conditional-26 (work in progress),
+              February 2014.
+
+   [RFC1950]  Deutsch, L. and J-L. Gailly, "ZLIB Compressed Data Format
+              Specification version 3.3", RFC 1950, May 1996.
+
+   [RFC1951]  Deutsch, P., "DEFLATE Compressed Data Format Specification
+              version 1.3", RFC 1951, May 1996.
+
+   [RFC1952]  Deutsch, P., Gailly, J-L., Adler, M., Deutsch, L., and G.
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 8]
+
+Internet-Draft            HTTP Message-Encoding               April 2014
+
+
+              Randers-Pehrson, "GZIP file format specification version
+              4.3", RFC 1952, May 1996.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC5226]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
+              IANA Considerations Section in RFCs", BCP 26, RFC 5226,
+              May 2008.
+
+   [Welch]    Welch, T., "A Technique for High Performance Data
+              Compression", IEEE Computer 17(6), June 1984.
+
+13.2.  Informative References
+
+   [BREACH]   Gluck, Y., Harris, N., and A. Prado, "BREACH: Reviving the
+              CRIME Attack", July 2013, <http://breachattack.com/
+              resources/
+              BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf>.
+
+Authors' Addresses
+
+   Keith Morgan
+   International Atomic Energy Agency
+
+   EMail: k.morgan@iaea.org
+
+
+   Chris Brunhuber
+   International Atomic Energy Agency
+
+   EMail: c.brunhuber@iaea.org
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Morgan & Brunhuber      Expires October 20, 2014                [Page 9]
+

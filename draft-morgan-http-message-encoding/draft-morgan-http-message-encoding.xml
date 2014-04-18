@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="lib/rfc2629.xslt"?>
+<!DOCTYPE rfc [
+<!ENTITY MAY "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>MAY</bcp14>">
+<!ENTITY MUST "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>MUST</bcp14>">
+<!ENTITY MUST-NOT "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>MUST NOT</bcp14>">
+<!ENTITY OPTIONAL "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>OPTIONAL</bcp14>">
+<!ENTITY RECOMMENDED "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>RECOMMENDED</bcp14>">
+<!ENTITY REQUIRED "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>REQUIRED</bcp14>">
+<!ENTITY SHALL "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>SHALL</bcp14>">
+<!ENTITY SHALL-NOT "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>SHALL NOT</bcp14>">
+<!ENTITY SHOULD "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>SHOULD</bcp14>">
+<!ENTITY SHOULD-NOT "<bcp14 xmlns='http://purl.org/net/xml2rfc/ext'>SHOULD NOT</bcp14>">
+<!ENTITY Note "<x:h xmlns:x='http://purl.org/net/xml2rfc/ext'>Note:</x:h>">
+<!ENTITY CONNECT           "<xref target='HTTP-p2' x:rel='#CONNECT' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+<!ENTITY content-codings   "<xref target='HTTP-p2' x:rel='#content.codings' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+<!ENTITY content-length    "<xref target='HTTP-p1' x:rel='#header.content-length' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+<!ENTITY notation          "<xref target='HTTP-p1' x:rel='#notation' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+<!ENTITY qvalue            "<xref target='HTTP-p2' x:rel='#quality.values' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+<!ENTITY status-304        "<xref target='HTTP-p4' x:rel='#status.304' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+<!ENTITY transfer-codings  "<xref target='HTTP-p1' x:rel='#transfer.codings' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+<!ENTITY transfer-encoding "<xref target='HTTP-p1' x:rel='#header.transfer-encoding' xmlns:x='http://purl.org/net/xml2rfc/ext'/>">
+]>
+<?rfc toc="yes" ?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no" ?>
+<?rfc linkmailto="no" ?>
+<?rfc editing="no" ?>
+<?rfc comments="yes" ?>
+<?rfc inline="yes"?>
+<?rfc rfcedstyle="yes"?>
+<?rfc iprnotified="no" ?>
+<?rfc-ext allow-markup-in-artwork="yes" ?>
+<?rfc-ext include-index="no" ?>
+
+<rfc ipr="trust200902"
+     category="std"
+     docName="draft-morgan-http-message-encoding-00"
+     x:maturity-level="proposed"
+     xmlns:x="http://purl.org/net/xml2rfc/ext">
+
+  <front>
+    <title abbrev="HTTP Message-Encoding">HTTP Message-Encoding</title>
+    <author initials="K." surname="Morgan" fullname="Keith Morgan">
+      <organization abbrev="IAEA">International Atomic Energy Agency</organization>
+      <address>
+        <email>k.morgan@iaea.org</email>
+      </address>
+    </author>
+    <author initials="C." surname="Brunhuber" fullname="Chris Brunhuber">
+      <organization abbrev="IAEA">International Atomic Energy Agency</organization>
+      <address>
+        <email>c.brunhuber@iaea.org</email>
+      </address>
+    </author>
+    <date year="2014" />
+    <keyword>HTTP</keyword>
+    <keyword>Content-Encoding</keyword>
+    <keyword>Transfer-Encoding</keyword>
+    <keyword>compression</keyword>
+    <keyword>compress</keyword>
+    <keyword>gzip</keyword>
+    <keyword>deflate</keyword>
+    <keyword>lz4</keyword>
+    <abstract>
+      <t>
+	Compression of Hypertext Transfer Protocol (HTTP) message
+	content is typically accomplished with
+	Content-Encoding. However, there are some use cases where
+	Content-Encoding cannot (or event should not) be used
+	e.g. dynamic compression of a range, etc. The HTTP
+	Transfer-Encoding mechanism suits these cases quite well, but
+	in light of recent security vulnerabilities (e.g. <xref
+	target="BREACH">BREACH</xref>) which exploit compression,
+	Transfer-Encoding is eschewed because its hop-to-hop nature
+	allows blanket compression by intermediaries which likely lack
+	the proper context for deciding if it is safe to
+	compress. This document introduces Message-Encoding, an
+	analogue to Transfer-Encoding, but with end-to-end encoding
+	and strict transformation rules related to intermediaries.
+      </t>
+      <t>
+        This document is an extension to, but does not obsolete, the
+        HTTP/1.1 message syntax.  HTTP's existing semantics remain
+        unchanged.
+      </t>
+      <t>
+	This document should be discussed on the ietf-http-wg@w3.org
+	mailing list, although it is not a work item of the HTTPbis
+	WG.
+      </t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section anchor="intro" title="Introduction">
+      <t>
+	TBD
+      </t>
+    </section>
+
+    <section title="Conventions and Terminology">
+      <t>
+	The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+	NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+	"OPTIONAL" in this document are to be interpreted as described
+	in <xref target="RFC2119">RFC 2119</xref>.
+      </t>
+      <t>
+	The following terms are used:
+	<list style="hanging">
+	  <t hangText="client:">
+	    The endpoint initiating the HTTP connection.
+	  </t>
+	  <t hangText="connection:">
+	    A transport-level connection between two endpoints.
+	  </t>
+	  <t hangText="endpoint:">
+	    Either the client or server of the connection.
+	  </t>
+	  <t hangText="intermediary:">
+	    A "proxy", "gateway" or other intermediary as defined in
+	    <xref target="HTTP-p1" x:fmt="of"
+		  x:rel="#intermediaries"/>.
+	  </t>
+	  <t hangText="peer:">
+	    An endpoint.  When discussing a particular endpoint,
+	    "peer" refers to the endpoint that is remote to the
+	    primary subject of discussion.
+	  </t>
+	  <t hangText="server:">
+	    The endpoint which did not initiate the HTTP connection.
+	  </t>
+	</list>
+      </t>
+    </section>
+
+    <section title="Syntax Notation" anchor="notation">
+      <t>
+	This document uses the same syntax notation as defined in &notation;.
+      </t>
+    </section>
+
+    <section title="Message Body" anchor="message.body">
+      <x:anchor-alias value="message-body"/>
+      <t>
+	This document extends the definition of a message body (if
+	any) of an HTTP message, which is used to carry the payload
+	body of that request or response.  The message body is
+	identical to the payload body unless transfer coding(s) have
+	been applied, as described in &transfer-encoding;, or message
+	coding(s) have been applied, as described in <xref
+	target="header.message-encoding"/>, or both.
+      </t>
+      <t>
+	The presence of a message body in a request is signaled by a
+	<x:ref>Content-Length</x:ref> (&content-length;),
+	<x:ref>Transfer-Encoding</x:ref> (&transfer-encoding;) or
+	<x:ref>Message-Encoding</x:ref> header field.
+      </t>
+      <figure><preamble>
+	A message body &MAY; contain both transfer coding(s) and 
+	message coding(s). For example,
+	</preamble><artwork type="example">
+	Message-Encoding: gzip
+	Transfer-Encoding: chunked
+	</artwork><postamble>
+	indicates that the payload body has been compressed using the gzip 
+	message coding and then chunked using the chunked transfer coding 
+	while forming the message body.
+      </postamble></figure>
+    </section>
+
+    <section title="Message-Encoding" anchor="header.message-encoding">
+      <iref primary="true" item="Message-Encoding header field" x:for-anchor=""/>
+      <x:anchor-alias value="Message-Encoding"/>
+      <t>
+	The Message-Encoding header field lists the message coding
+	names corresponding to the sequence of message codings that
+	have been (or will be) applied to the payload body in order to
+	form the message body.  Message codings are defined in <xref
+	target="message.codings"/>.
+      </t>
+
+      <figure><artwork type="abnf2616"><iref primary="true" item="Grammar" subitem="Message-Encoding"/>
+        <x:ref>Message-Encoding</x:ref> = 1#<x:ref>message-coding</x:ref>
+      </artwork></figure>
+      <figure><preamble>
+	Multiple message codings &MAY; be applied to a message. For example,
+	</preamble><artwork type="example">
+	Message-Encoding: foo, gzip
+	</artwork><postamble>
+	indicates that the payload body has been encoded using the foo
+	coding and then compressed using the gzip coding while forming 
+	the message body; where, for example, foo is a coding that
+	increases the compressibility of the message.
+      </postamble></figure>
+      <t>
+	Message-Encoding is analogous to HTTP
+	<x:ref>Transfer-Encoding</x:ref> (&transfer-encoding;). The
+	key difference between Message-Encoding and Transfer-Encoding
+	is that Message-Encoding is an end-to-end header field while
+	Transfer-Encoding is a hop-to-hop header field.  While
+	transfer codings may be added or removed by any intermediary
+	in the HTTP connection, intermediaries must follow the strict
+	requirements defined in <xref
+	target="header.message-encoding.intermediaries"/> with respect
+	to message codings.
+      </t>
+      <t>
+	All message coding(s), if any, &MUST; be applied before
+	transfer coding(s), if any.
+      </t>
+      <t>
+	Message-Encoding &MAY; be sent in a response to a HEAD request
+	or in a <x:ref>304 (Not Modified)</x:ref> response
+	(&status-304;) to a GET request, neither of which includes a	
+	message body, to indicate that the origin server would have
+	applied a message coding to the message body if the request
+	had been an unconditional GET.
+      </t>
+      <t>
+	A server &MUST-NOT; send a Message-Encoding header field in
+	any response with a status code of <x:ref>1xx
+	(Informational)</x:ref> or <x:ref>204 (No Content)</x:ref>.  A
+	server &MUST-NOT; send a Message-Encoding header field in any
+	<x:ref>2xx (Successful)</x:ref> response to a CONNECT request
+	(&CONNECT;).
+      </t>
+      <t>
+	As Message-Encoding is an HTTP extension, a client &MUST-NOT;
+	send a request containing Message-Encoding unless it knows the
+	server will handle the specific message coding(s); such
+	knowledge might be in the form of specific user configuration
+	or by remembering the codings of a prior received response.  A
+	server &MUST-NOT; send a response containing Message-Encoding
+	unless the corresponding request indicates support in a ME
+	header field.
+      </t>
+      <t>
+	A server that receives a request message with a message coding
+	it does not understand &SHOULD; respond with <x:ref>501 (Not
+	Implemented)</x:ref>.
+      </t>
+      <section title="Intermediaries" anchor="header.message-encoding.intermediaries">
+	<t>
+	  Intermediaries &MUST-NOT; add message codings, however 
+	  intermediaries &MAY; remove message codings if necessary.  
+	  If desirable, an intermediary MAY remove one or more 
+	  message codings and later re-encode the payload body (or 
+	  a portion thereof e.g. range), but the identical set of 
+	  message codings &MUST; be applied in the same order as the 
+	  original message body was received.  For example, an 
+	  intermediary might choose to remove a gzip message coding 
+	  (i.e. decompress) for local storage so that ranges might 
+	  be more easily extracted and served.  In this case the 
+	  intermediary could serve ranges from its uncompressed local 
+	  copy of the content either without a message coding or 
+	  with gzip message coding, but not with any other message 
+	  coding.
+	</t>
+      </section>
+    </section>
+
+    <section title="Message Codings" anchor="message.codings">
+      <x:anchor-alias value="message-coding"/>
+      <x:anchor-alias value="message-extension"/>
+      <t>
+	Message coding names are used to indicate an encoding
+	transformation that has been, can be, or might need to be
+	applied to a payload body. This differs from a content coding
+	in that the message coding is a property of the message rather
+	than a property of the representation that is being
+	messagered.
+      </t>
+      <figure><artwork type="abnf2616"><iref primary="true" item="Grammar" subitem="message-coding"/><iref primary="true" item="Grammar" subitem="message-extension"/>
+      <x:ref>message-coding</x:ref> = "compress" ; <xref target="compress.coding"/>
+      / "deflate" ; <xref target="deflate.coding"/>
+      / "gzip" ; <xref target="gzip.coding"/>
+      / <x:ref>message-extension</x:ref>
+      <x:ref>message-extension</x:ref> = <x:ref>token</x:ref> *( <x:ref>OWS</x:ref> ";" <x:ref>OWS</x:ref> <x:ref>message-parameter</x:ref> )
+      </artwork></figure>
+      <t anchor="rule.parameter">
+	<x:anchor-alias value="message-parameter"/>
+	Parameters are in the form of a name or name=value pair.
+      </t>
+      <figure><artwork type="abnf2616"><iref primary="true" item="Grammar" subitem="message-parameter"/>
+      <x:ref>message-parameter</x:ref> = <x:ref>token</x:ref> <x:ref>BWS</x:ref> "=" <x:ref>BWS</x:ref> ( <x:ref>token</x:ref> / <x:ref>quoted-string</x:ref> )
+      </artwork></figure>
+      <t>
+	All message-coding names are case-insensitive and ought to be
+	registered within the HTTP Message Coding registry, as defined
+	in <xref target="message.coding.registry"/>.  They are used in
+	the <x:ref>ME</x:ref> (<xref target="header.me"/>) and
+	<x:ref>Message-Encoding</x:ref> (<xref
+	target="header.message-encoding"/>) header fields.
+      </t>
+    </section>
+
+    <section title="Compression Codings" anchor="compression.codings">
+      <t>
+	The codings defined below can be used to compress the payload
+	of a message.
+      </t>
+
+      <section title="Compress Coding" anchor="compress.coding">
+	<iref item="compress (Coding Format)"/>
+	<t>
+	  The "compress" coding is an adaptive Lempel-Ziv-Welch (LZW)
+	  coding <xref target="Welch"/> that is commonly produced by
+	  the UNIX file compression program "compress".  A recipient
+	  &SHOULD; consider "x-compress" to be equivalent to
+	  "compress".
+	</t>
+      </section>
+
+      <section title="Deflate Coding" anchor="deflate.coding">
+	<iref item="deflate (Coding Format)"/>
+	<t>
+	  The "deflate" coding is a "zlib" data format <xref
+	  target="RFC1950"/> containing a "deflate" compressed data
+	  stream <xref target="RFC1951"/> that uses a combination of
+	  the Lempel-Ziv (LZ77) compression algorithm and Huffman
+	  coding.
+	</t>
+	<x:note>
+	  <t>
+	    &Note; Some non-conformant implementations send the
+	    "deflate" compressed data without the zlib wrapper.
+	  </t>
+	</x:note>
+      </section>
+
+      <section title="Gzip Coding" anchor="gzip.coding">
+	<iref item="gzip (Coding Format)"/>
+	<t>
+	  The "gzip" coding is an LZ77 coding with a 32 bit CRC that
+	  is commonly produced by the gzip file compression program
+	  <xref target="RFC1952"/>.  A recipient &SHOULD; consider
+	  "x-gzip" to be equivalent to "gzip".
+	</t>
+      </section>
+    </section>
+
+
+    <section title="ME" anchor="header.me">
+      <iref primary="true" item="ME header field" x:for-anchor=""/>
+      <x:anchor-alias value="ME"/>
+      <x:anchor-alias value="m-codings"/>
+      <x:anchor-alias value="m-ranking"/>
+      <x:anchor-alias value="rank"/>
+      <t>
+	The "ME" header field in a request indicates what message
+	codings the client is willing to accept in a response.
+      </t>
+      <t>
+	The ME field-value consists of a comma-separated list of
+	message coding names, each allowing for optional parameters
+	(as described in <xref target="message.codings"/>).
+      </t>
+      <figure><artwork type="abnf2616"><iref primary="true" item="Grammar" subitem="ME"/><iref primary="true" item="Grammar" subitem="m-codings"/><iref primary="true" item="Grammar" subitem="m-ranking"/><iref primary="true" item="Grammar" subitem="rank"/>
+      <x:ref>ME</x:ref>        = #<x:ref>m-codings</x:ref>
+      <x:ref>m-codings</x:ref> = ( <x:ref>message-coding</x:ref> [ <x:ref>m-ranking</x:ref> ] )
+      <x:ref>m-ranking</x:ref> = <x:ref>OWS</x:ref> ";" <x:ref>OWS</x:ref> "q=" <x:ref>rank</x:ref>
+      <x:ref>rank</x:ref>      = ( "0" [ "." 0*3<x:ref>DIGIT</x:ref> ] )
+      / ( "1" [ "." 0*3("0") ] )
+      </artwork></figure>
+      <t>
+	Three examples of ME use are below.
+      </t>
+      <figure><artwork type="example">
+	ME: gzip
+	ME:
+	ME: gzip;q=0.5
+      </artwork></figure>
+      <t>
+	When multiple message codings are acceptable, the client &MAY;
+	rank the codings by preference using a case-insensitive "q"
+	parameter (similar to the qvalues used in content negotiation
+	fields, &qvalue;). The rank value is a real number in the
+	range 0 through 1, where 0.001 is the least preferred and 1 is
+	the most preferred; a value of 0 means "not acceptable".
+      </t>
+      <t>
+	If the ME field-value is empty or if no ME field is present,
+	there are no acceptable message codings. A message with no
+	message coding is always acceptable.
+      </t>
+    </section>
+
+    <section title="Message Coding Registry" anchor="message.coding.registry">
+      <t>
+	The HTTP Message Coding Registry defines the name space for
+	message coding names. It is maintained at <eref
+	target="http://www.iana.org/assignments/http-parameters"/>.
+      </t>
+
+      <section title="Procedure" anchor="message.coding.registry.procedure">
+	<t>
+	  Registrations &MUST; include the following fields:
+	  <list style="symbols">
+	    <t>Name</t>
+	    <t>Description</t>
+	    <t>Pointer to specification text</t>
+	  </list>
+	</t>
+	<t>
+	  Names of message codings &MUST-NOT; overlap with names of
+	  content codings (&content-codings;) or transfer codings
+	  (&transfer-codings;) unless the encoding transformation is
+	  identical, as is the case for the compression codings
+	  defined in <xref target="compression.codings"/>.
+	</t>
+	<t>
+	  Values to be added to this name space require IETF Review
+	  (see <xref target="RFC5226" x:fmt="of" x:sec="4.1"/>), and
+	  &MUST; conform to the purpose of message coding defined in
+	  this specification.
+	</t>
+	<t>
+	  Use of program names for the identification of encoding formats
+	  is not desirable and is discouraged for future encodings.
+	</t>
+      </section>
+
+      <section title="Registration" anchor="message.coding.registration">
+	<t>
+	  The HTTP Message Coding Registry shall be updated with the
+	  registrations below:
+	</t>
+	<texttable align="left" suppress-title="true" anchor="iana.message.coding.registration.table">
+	  <ttcol>Name</ttcol>
+	  <ttcol>Description</ttcol>
+	  <ttcol>Reference</ttcol>
+	  <c>compress</c>
+	  <c>UNIX "compress" data format <xref target="Welch"/></c>
+	  <c>
+	    <xref target="compress.coding"/>
+	  </c>
+	  <c>deflate</c>
+	  <c>"deflate" compressed data (<xref target="RFC1951"/>) inside
+	  the "zlib" data format (<xref target="RFC1950"/>)
+	  </c>
+	  <c>
+	    <xref target="deflate.coding"/>
+	  </c>
+	  <c>gzip</c>
+	  <c>GZIP file format <xref target="RFC1952"/></c>
+	  <c>
+	    <xref target="gzip.coding"/>
+	  </c>
+	  <c>x-compress</c>
+	  <c>Deprecated (alias for compress)</c>
+	  <c>
+	    <xref target="compress.coding"/>
+	  </c>
+	  <c>x-gzip</c>
+	  <c>Deprecated (alias for gzip)</c>
+	  <c>
+	    <xref target="gzip.coding"/>
+	  </c>
+	</texttable>
+      </section>
+    </section>
+
+    <section title="Security Considerations">
+      <t>TBD</t>
+    </section>
+
+    <section title="IANA Considerations">
+      <t>TBD</t>
+    </section>
+
+    <section title="Acknowledgements">
+      <t>
+      </t>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+
+      <reference anchor="RFC2119">
+	<front>
+	  <title>
+	    Key words for use in RFCs to Indicate Requirement Levels
+	  </title>
+	  <author initials="S." surname="Bradner" fullname="Scott Bradner">
+	    <organization>Harvard University</organization>
+	    <address><email>sob@harvard.edu</email></address>
+	  </author>
+	  <date month="March" year="1997"/>
+	</front>
+	<seriesInfo name="BCP" value="14"/>
+	<seriesInfo name="RFC" value="2119"/>
+      </reference>
+
+      <reference anchor="RFC5226">
+	<front>
+	  <title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
+	  <author initials="T." surname="Narten" fullname="T. Narten"/>
+	  <author initials="H." surname="Alvestrand" fullname="H. Alvestrand"/>
+	  <date year="2008" month="May" />
+	</front>
+	<seriesInfo name="BCP" value="26" />
+	<seriesInfo name="RFC" value="5226" />
+      </reference>
+
+      <reference anchor="HTTP-p1">
+	<front>
+	  <title>
+	  Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing</title>
+	  <author fullname="Roy T. Fielding" initials="R." role="editor" surname="Fielding">
+	    <organization abbrev="Adobe">Adobe Systems Incorporated</organization>
+	    <address><email>fielding@gbiv.com</email></address>
+	  </author>
+	  <author fullname="Julian F. Reschke" initials="J. F." role="editor" surname="Reschke">
+	    <organization abbrev="greenbytes">greenbytes GmbH</organization>
+	    <address><email>julian.reschke@greenbytes.de</email></address>
+	  </author>
+	  <date month="February" year="2014" />
+	</front>
+	<seriesInfo name="Internet-Draft" value="draft-ietf-httpbis-p1-messaging-26" />
+	<x:source href="refs/p1-messaging.xml"
+		  basename="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging">
+	  <x:defines>BWS</x:defines>
+	  <x:defines>Connection</x:defines>
+	  <x:defines>Content-Length</x:defines>
+	  <x:defines>DIGIT</x:defines>
+	  <x:defines>quoted-string</x:defines>
+	  <x:defines>OWS</x:defines>
+	  <x:defines>token</x:defines>
+	  <x:defines>Transfer-Encoding</x:defines>
+	</x:source>
+      </reference>
+      <reference anchor="HTTP-p2">
+	<front>
+	  <title>
+	  Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</title>
+	  <author fullname="Roy T. Fielding" initials="R." role="editor" surname="Fielding">
+	    <organization abbrev="Adobe">Adobe Systems Incorporated</organization>
+	    <address><email>fielding@gbiv.com</email></address>
+	  </author>
+	  <author fullname="Julian F. Reschke" initials="J. F." role="editor" surname="Reschke">
+	    <organization abbrev="greenbytes">greenbytes GmbH</organization>
+	    <address><email>julian.reschke@greenbytes.de</email></address>
+	  </author>
+	  <date month="February" year="2014" />
+	</front>
+	<seriesInfo name="Internet-Draft" value="draft-ietf-httpbis-p2-semantics-26" />
+	<x:source href="refs/p2-semantics.xml"
+		  basename="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics">
+	  <x:defines>1xx (Informational)</x:defines>
+	  <x:defines>1xx</x:defines>
+	  <x:defines>2xx (Successful)</x:defines>
+	  <x:defines>2xx</x:defines>
+	  <x:defines>204 (No Content)</x:defines>
+	  <x:defines>501 (Not Implemented)</x:defines>
+	</x:source>
+      </reference>
+      <reference anchor="HTTP-p4">
+	<front>
+	  <title>Hypertext Transfer Protocol (HTTP/1.1): Conditional Requests</title>
+	  <author fullname="Roy T. Fielding" initials="R." role="editor" surname="Fielding">
+	    <organization abbrev="Adobe">Adobe Systems Incorporated</organization>
+	    <address><email>fielding@gbiv.com</email></address>
+	  </author>
+	  <author fullname="Julian F. Reschke" initials="J. F." role="editor" surname="Reschke">
+	    <organization abbrev="greenbytes">greenbytes GmbH</organization>
+	    <address><email>julian.reschke@greenbytes.de</email></address>
+	  </author>
+	  <date month="February" year="2014" />
+	</front>
+	<seriesInfo name="Internet-Draft" value="draft-ietf-httpbis-p4-conditional-26" />
+	<x:source href="refs/p4-conditional.xml"
+		  basename="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p4-conditional">
+	  <x:defines>304 (Not Modified)</x:defines>
+	</x:source>
+      </reference>
+      <reference anchor="RFC1950">
+	<front>
+	  <title>ZLIB Compressed Data Format Specification version 3.3</title>
+	  <author initials="L.P." surname="Deutsch" fullname="L. Peter Deutsch">
+	    <organization>Aladdin Enterprises</organization>
+	    <address><email>ghost@aladdin.com</email></address>
+	  </author>
+	  <author initials="J-L." surname="Gailly" fullname="Jean-Loup Gailly"/>
+	  <date month="May" year="1996"/>
+	</front>
+	<seriesInfo name="RFC" value="1950"/>
+	<!--<annotation>
+	    RFC 1950 is an Informational RFC, thus it might be less stable than
+	    this specification. On the other hand, this downward reference was 
+	    present since the publication of <xref target="RFC2068" x:fmt="none">RFC 2068</xref> in 1997,
+	    therefore it is unlikely to cause problems in practice. See also
+	    <xref target="BCP97"/>.
+	    </annotation>-->
+      </reference>
+
+      <reference anchor="RFC1951">
+	<front>
+	  <title>DEFLATE Compressed Data Format Specification version 1.3</title>
+	  <author initials="P." surname="Deutsch" fullname="L. Peter Deutsch">
+	    <organization>Aladdin Enterprises</organization>
+	    <address><email>ghost@aladdin.com</email></address>
+	  </author>
+	  <date month="May" year="1996"/>
+	</front>
+	<seriesInfo name="RFC" value="1951"/>
+	<!--<annotation>
+	    RFC 1951 is an Informational RFC, thus it might be less stable than
+	    this specification. On the other hand, this downward reference was 
+	    present since the publication of <xref target="RFC2068" x:fmt="none">RFC 2068</xref> in 1997,
+	    therefore it is unlikely to cause problems in practice. See also
+	    <xref target="BCP97"/>.
+	    </annotation>-->
+      </reference>
+
+      <reference anchor="RFC1952">
+	<front>
+	  <title>GZIP file format specification version 4.3</title>
+	  <author initials="P." surname="Deutsch" fullname="L. Peter Deutsch">
+	    <organization>Aladdin Enterprises</organization>
+	    <address><email>ghost@aladdin.com</email></address>
+	  </author>
+	  <author initials="J-L." surname="Gailly" fullname="Jean-Loup Gailly">
+	    <address><email>gzip@prep.ai.mit.edu</email></address>
+	  </author>
+	  <author initials="M." surname="Adler" fullname="Mark Adler">
+	    <address><email>madler@alumni.caltech.edu</email></address>
+	  </author>
+	  <author initials="L.P." surname="Deutsch" fullname="L. Peter Deutsch">
+	    <address><email>ghost@aladdin.com</email></address>
+	  </author>
+	  <author initials="G." surname="Randers-Pehrson" fullname="Glenn Randers-Pehrson">
+	    <address><email>randeg@alumni.rpi.edu</email></address>
+	  </author>
+	  <date month="May" year="1996"/>
+	</front>
+	<seriesInfo name="RFC" value="1952"/>
+	<!--<annotation>
+	    RFC 1952 is an Informational RFC, thus it might be less stable than
+	    this specification. On the other hand, this downward reference was 
+	    present since the publication of <xref target="RFC2068" x:fmt="none">RFC 2068</xref> in 1997,
+	    therefore it is unlikely to cause problems in practice. See also
+	    <xref target="BCP97"/>.
+	    </annotation>-->
+      </reference>
+      <reference anchor="Welch">
+	<front>
+	  <title>A Technique for High Performance Data Compression</title>
+	  <author initials="T.A." surname="Welch" fullname="Terry A. Welch"/>
+	  <date month="June" year="1984"/>
+	</front>
+	<seriesInfo name="IEEE Computer" value="17(6)"/>
+      </reference>
+
+    </references>
+
+    <references title="Informative References">
+
+      <reference anchor="BREACH"
+		 target="http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf">
+	<front>
+	  <title>
+	    BREACH: Reviving the CRIME Attack
+	  </title>
+	  <author initials="Y." surname="Gluck"/>
+	  <author initials="N." surname="Harris"/>
+	  <author initials="A." surname="Prado"/>
+	  <date year="2013" month="July" day="12"/>
+	</front>
+      </reference>
+
+    </references>
+
+  </back>
+</rfc>
+<!--
+    vim:et:tw=100:sw=2:
+-->

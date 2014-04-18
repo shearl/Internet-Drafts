@@ -1,0 +1,780 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+   <head profile="http://dublincore.org/documents/2008/08/04/dc-html/">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>HTTP Message-Encoding</title><style type="text/css" title="Xml2Rfc (sans serif)">
+a {
+  text-decoration: none;
+}
+a.smpl {
+  color: black;
+}
+a:hover {
+  text-decoration: underline;
+}
+a:active {
+  text-decoration: underline;
+}
+address {
+  margin-top: 1em;
+  margin-left: 2em;
+  font-style: normal;
+}
+body {
+  color: black;
+  font-family: cambria, helvetica, arial, sans-serif;
+  font-size: 11pt;
+  margin-right: 2em;
+}
+cite {
+  font-style: normal;
+}
+div.note {
+  margin-left: 2em;
+}
+dl {
+  margin-left: 2em;
+}
+ul.empty {
+  list-style-type: none;
+}
+ul.empty li {
+  margin-top: .5em;
+}
+dl p {
+  margin-left: 0em;
+}
+dt {
+  margin-top: .5em;
+}
+h1 {
+  font-size: 130%;
+  line-height: 21pt;
+  page-break-after: avoid;
+}
+h1.np {
+  page-break-before: always;
+}
+h2 {
+  font-size: 120%;
+  line-height: 15pt;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 110%;
+  page-break-after: avoid;
+}
+h4, h5, h6 {
+  page-break-after: avoid;
+}
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+  color: black;
+}
+img {
+  margin-left: 3em;
+}
+li {
+  margin-left: 2em;
+}
+ol {
+  margin-left: 2em;
+}
+ol.la {
+  list-style-type: lower-alpha;
+}
+ol.ua {
+  list-style-type: upper-alpha;
+}
+ol p {
+  margin-left: 0em;
+}
+p {
+  margin-left: 2em;
+}
+pre {
+  margin-left: 3em;
+  background-color: lightyellow;
+  padding: .25em;
+  page-break-inside: avoid;
+}
+pre.text2 {
+  border-style: dotted;
+  border-width: 1px;
+  background-color: #f0f0f0;
+  width: 69em;
+}
+pre.inline {
+  background-color: white;
+  padding: 0em;
+}
+pre.text {
+  border-style: dotted;
+  border-width: 1px;
+  background-color: #f8f8f8;
+  width: 69em;
+}
+pre.drawing {
+  border-style: solid;
+  border-width: 1px;
+  background-color: #f8f8f8;
+  padding: 2em;
+}
+table {
+  margin-left: 2em;
+}
+table.tt {
+  vertical-align: top;
+  border-color: gray;
+}
+table.tt th {
+  border-color: gray;
+}
+table.tt td {
+  border-color: gray;
+}
+table.all {
+  border-style: solid;
+  border-width: 2px;
+}
+table.full {
+  border-style: solid;
+  border-width: 2px;
+}
+table.tt td {
+  vertical-align: top;
+}
+table.all td {
+  border-style: solid;
+  border-width: 1px;
+}
+table.full td {
+  border-style: none solid;
+  border-width: 1px;
+}
+table.tt th {
+  vertical-align: top;
+}
+table.all th {
+  border-style: solid;
+  border-width: 1px;
+}
+table.full th {
+  border-style: solid;
+  border-width: 1px 1px 2px 1px;
+}
+table.headers th {
+  border-style: none none solid none;
+  border-width: 2px;
+}
+table.left {
+  margin-right: auto;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+caption {
+  caption-side: bottom;
+  font-weight: bold;
+  font-size: 10pt;
+  margin-top: .5em;
+}
+
+table.header {
+  border-spacing: 1px;
+  width: 95%;
+  font-size: 11pt;
+  color: white;
+}
+td.top {
+  vertical-align: top;
+}
+td.topnowrap {
+  vertical-align: top;
+  white-space: nowrap;
+}
+table.header td {
+  background-color: gray;
+  width: 50%;
+}
+td.reference {
+  vertical-align: top;
+  white-space: nowrap;
+  padding-right: 1em;
+}
+thead {
+  display:table-header-group;
+}
+ul.toc, ul.toc ul {
+  list-style: none;
+  margin-left: 1.5em;
+  padding-left: 0em;
+}
+ul.toc li {
+  line-height: 150%;
+  font-weight: bold;
+  margin-left: 0em;
+}
+ul.toc li li {
+  line-height: normal;
+  font-weight: normal;
+  font-size: 10pt;
+  margin-left: 0em;
+}
+li.excluded {
+  font-size: 0pt;
+}
+ul p {
+  margin-left: 0em;
+}
+.title, .filename, h1, h2, h3, h4 {
+  font-family: candara, helvetica, arial, sans-serif;
+}
+samp, tt, code, pre {
+  font: consolas, monospace;
+}
+.bcp14 {
+  font-style: normal;
+  text-transform: lowercase;
+  font-variant: small-caps;
+}
+.comment {
+  background-color: yellow;
+}
+.center {
+  text-align: center;
+}
+.error {
+  color: red;
+  font-style: italic;
+  font-weight: bold;
+}
+.figure {
+  font-weight: bold;
+  text-align: center;
+  font-size: 10pt;
+}
+.filename {
+  color: #333333;
+  font-size: 75%;
+  font-weight: bold;
+  line-height: 21pt;
+  text-align: center;
+}
+.fn {
+  font-weight: bold;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+.title {
+  color: green;
+  font-size: 150%;
+  line-height: 18pt;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 36pt;
+}
+.warning {
+  font-size: 130%;
+  background-color: yellow;
+}
+
+
+@media print {
+  .noprint {
+    display: none;
+  }
+
+  a {
+    color: black;
+    text-decoration: none;
+  }
+
+  table.header {
+    width: 90%;
+  }
+
+  td.header {
+    width: 50%;
+    color: black;
+    background-color: white;
+    vertical-align: top;
+    font-size: 110%;
+  }
+
+  ul.toc a:nth-child(2)::after {
+    content: leader('.') target-counter(attr(href), page);
+  }
+
+  ul.ind li li a {
+    content: target-counter(attr(href), page);
+  }
+
+  .print2col {
+    column-count: 2;
+    -moz-column-count: 2;
+    column-fill: auto;
+  }
+}
+
+@page {
+  @top-left {
+       content: "Internet-Draft";
+  }
+  @top-right {
+       content: "April 2014";
+  }
+  @top-center {
+       content: "HTTP Message-Encoding";
+  }
+  @bottom-left {
+       content: "Morgan & Brunhuber";
+  }
+  @bottom-center {
+       content: "Expires October 20, 2014";
+  }
+  @bottom-right {
+       content: "[Page " counter(page) "]";
+  }
+}
+
+@page:first {
+    @top-left {
+      content: normal;
+    }
+    @top-right {
+      content: normal;
+    }
+    @top-center {
+      content: normal;
+    }
+}
+</style><link rel="Contents" href="#rfc.toc">
+      <link rel="Author" href="#rfc.authors">
+      <link rel="Copyright" href="#rfc.copyrightnotice">
+      <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+      <link rel="Chapter" title="2 Conventions and Terminology" href="#rfc.section.2">
+      <link rel="Chapter" title="3 Syntax Notation" href="#rfc.section.3">
+      <link rel="Chapter" title="4 Message Body" href="#rfc.section.4">
+      <link rel="Chapter" title="5 Message-Encoding" href="#rfc.section.5">
+      <link rel="Chapter" title="6 Message Codings" href="#rfc.section.6">
+      <link rel="Chapter" title="7 Compression Codings" href="#rfc.section.7">
+      <link rel="Chapter" title="8 ME" href="#rfc.section.8">
+      <link rel="Chapter" title="9 Message Coding Registry" href="#rfc.section.9">
+      <link rel="Chapter" title="10 Security Considerations" href="#rfc.section.10">
+      <link rel="Chapter" title="11 IANA Considerations" href="#rfc.section.11">
+      <link rel="Chapter" title="12 Acknowledgements" href="#rfc.section.12">
+      <link rel="Chapter" href="#rfc.section.13" title="13 References">
+      <meta name="generator" content="http://greenbytes.de/tech/webdav/rfc2629.xslt, Revision 1.624, 2014/03/28 12:53:01, XSLT vendor: SAXON 8.9.0.4 from Saxonica http://www.saxonica.com/">
+      <meta name="keywords" content="HTTP, Content-Encoding, Transfer-Encoding, compression, compress, gzip, deflate, lz4">
+      <link rel="schema.dct" href="http://purl.org/dc/terms/">
+      <meta name="dct.creator" content="Morgan, K.">
+      <meta name="dct.creator" content="Brunhuber, C.">
+      <meta name="dct.identifier" content="urn:ietf:id:draft-morgan-http-message-encoding-00">
+      <meta name="dct.issued" scheme="ISO8601" content="2014-04-18">
+      <meta name="dct.abstract" content="Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However, there are some use cases where Content-Encoding cannot (or event should not) be used e.g. dynamic compression of a range, etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. BREACH) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries. This document is an extension to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged. This document should be discussed on the ietf-http-wg@w3.org mailing list, although it is not a work item of the HTTPbis WG.">
+      <meta name="description" content="Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However, there are some use cases where Content-Encoding cannot (or event should not) be used e.g. dynamic compression of a range, etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. BREACH) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries. This document is an extension to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged. This document should be discussed on the ietf-http-wg@w3.org mailing list, although it is not a work item of the HTTPbis WG.">
+   </head>
+   <body>
+      <table class="header">
+         <tbody>
+            <tr>
+               <td class="left">Network Working Group</td>
+               <td class="right">K. Morgan</td>
+            </tr>
+            <tr>
+               <td class="left">Internet-Draft</td>
+               <td class="right">C. Brunhuber</td>
+            </tr>
+            <tr>
+               <td class="left">Intended status: Standards Track</td>
+               <td class="right">IAEA</td>
+            </tr>
+            <tr>
+               <td class="left">Expires: October 20, 2014</td>
+               <td class="right">April 18, 2014</td>
+            </tr>
+         </tbody>
+      </table>
+      <p class="title">HTTP Message-Encoding<br><span class="filename">draft-morgan-http-message-encoding-00</span></p>
+      <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
+      <p>Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However,
+         there are some use cases where Content-Encoding cannot (or event should not) be used e.g. dynamic compression of a range,
+         etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. <a href="#BREACH">BREACH</a> <cite title="BREACH: Reviving the CRIME Attack">[BREACH]</cite>) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries
+         which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an
+         analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries.
+      </p>
+      <p>This document is an extension to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged.</p>
+      <p>This document should be discussed on the ietf-http-wg@w3.org mailing list, although it is not a work item of the HTTPbis WG.</p>
+      <div id="rfc.status">
+         <h1><a href="#rfc.status">Status of This Memo</a></h1>
+         <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+         <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF). Note that other groups may also distribute
+            working documents as Internet-Drafts. The list of current Internet-Drafts is at <a href="http://datatracker.ietf.org/drafts/current/">http://datatracker.ietf.org/drafts/current/</a>.
+         </p>
+         <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other
+            documents at any time. It is inappropriate to use Internet-Drafts as reference material or to cite them other than as “work
+            in progress”.
+         </p>
+         <p>This Internet-Draft will expire on October 20, 2014.</p>
+      </div>
+      <div id="rfc.copyrightnotice">
+         <h1><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
+         <p>Copyright © 2014 IETF Trust and the persons identified as the document authors. All rights reserved.</p>
+         <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of publication of this document. Please review these documents carefully, as they describe your rights
+            and restrictions with respect to this document. Code Components extracted from this document must include Simplified BSD License
+            text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified
+            BSD License.
+         </p>
+      </div>
+      <hr class="noprint">
+      <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+      <ul class="toc">
+         <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#intro">Introduction</a></li>
+         <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.2">Conventions and Terminology</a></li>
+         <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#notation">Syntax Notation</a></li>
+         <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#message.body">Message Body</a></li>
+         <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#header.message-encoding">Message-Encoding</a><ul>
+               <li><a href="#rfc.section.5.1">5.1</a>&nbsp;&nbsp;&nbsp;<a href="#header.message-encoding.intermediaries">Intermediaries</a></li>
+            </ul>
+         </li>
+         <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#message.codings">Message Codings</a></li>
+         <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#compression.codings">Compression Codings</a><ul>
+               <li><a href="#rfc.section.7.1">7.1</a>&nbsp;&nbsp;&nbsp;<a href="#compress.coding">Compress Coding</a></li>
+               <li><a href="#rfc.section.7.2">7.2</a>&nbsp;&nbsp;&nbsp;<a href="#deflate.coding">Deflate Coding</a></li>
+               <li><a href="#rfc.section.7.3">7.3</a>&nbsp;&nbsp;&nbsp;<a href="#gzip.coding">Gzip Coding</a></li>
+            </ul>
+         </li>
+         <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a href="#header.me">ME</a></li>
+         <li><a href="#rfc.section.9">9.</a>&nbsp;&nbsp;&nbsp;<a href="#message.coding.registry">Message Coding Registry</a><ul>
+               <li><a href="#rfc.section.9.1">9.1</a>&nbsp;&nbsp;&nbsp;<a href="#message.coding.registry.procedure">Procedure</a></li>
+               <li><a href="#rfc.section.9.2">9.2</a>&nbsp;&nbsp;&nbsp;<a href="#message.coding.registration">Registration</a></li>
+            </ul>
+         </li>
+         <li><a href="#rfc.section.10">10.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.10">Security Considerations</a></li>
+         <li><a href="#rfc.section.11">11.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.11">IANA Considerations</a></li>
+         <li><a href="#rfc.section.12">12.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.12">Acknowledgements</a></li>
+         <li><a href="#rfc.section.13">13.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">References</a><ul>
+               <li><a href="#rfc.section.13.1">13.1</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references.1">Normative References</a></li>
+               <li><a href="#rfc.section.13.2">13.2</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references.2">Informative References</a></li>
+            </ul>
+         </li>
+         <li><a href="#rfc.authors">Authors' Addresses</a></li>
+      </ul>
+      <div id="intro">
+         <h1 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a href="#intro">Introduction</a></h1>
+         <p id="rfc.section.1.p.1">TBD</p>
+      </div>
+      <div>
+         <h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a>&nbsp;Conventions and Terminology
+         </h1>
+         <p id="rfc.section.2.p.1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"
+            in this document are to be interpreted as described in <a href="#RFC2119">RFC 2119</a> <cite title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite>.
+         </p>
+         <p id="rfc.section.2.p.2">The following terms are used: </p>
+         <dl>
+            <dt>client:</dt>
+            <dd>The endpoint initiating the HTTP connection.</dd>
+            <dt>connection:</dt>
+            <dd>A transport-level connection between two endpoints.</dd>
+            <dt>endpoint:</dt>
+            <dd>Either the client or server of the connection.</dd>
+            <dt>intermediary:</dt>
+            <dd>A "proxy", "gateway" or other intermediary as defined in <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#intermediaries" title="Intermediaries">Section 2.3</a> of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>.
+            </dd>
+            <dt>peer:</dt>
+            <dd>An endpoint. When discussing a particular endpoint, "peer" refers to the endpoint that is remote to the primary subject of
+               discussion.
+            </dd>
+            <dt>server:</dt>
+            <dd>The endpoint which did not initiate the HTTP connection.</dd>
+         </dl>
+      </div>
+      <div id="notation">
+         <h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a>&nbsp;<a href="#notation">Syntax Notation</a></h1>
+         <p id="rfc.section.3.p.1">This document uses the same syntax notation as defined in <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#notation" title="Syntax Notation">Section 1.2</a> of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>.
+         </p>
+      </div>
+      <div id="message.body">
+         <h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a>&nbsp;<a href="#message.body">Message Body</a></h1>
+         <p id="rfc.section.4.p.1">This document extends the definition of a message body (if any) of an HTTP message, which is used to carry the payload body
+            of that request or response. The message body is identical to the payload body unless transfer coding(s) have been applied,
+            as described in <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#header.transfer-encoding" title="Transfer-Encoding">Section 3.3.1</a> of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>, or message coding(s) have been applied, as described in <a href="#header.message-encoding" id="rfc.xref.header.message-encoding.1" title="Message-Encoding">Section&nbsp;5</a>, or both.
+         </p>
+         <p id="rfc.section.4.p.2">The presence of a message body in a request is signaled by a <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#header.content-length" class="smpl">Content-Length</a> (<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#header.content-length" title="Content-Length">Section 3.3.2</a> of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>), <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#header.transfer-encoding" class="smpl">Transfer-Encoding</a> (<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#header.transfer-encoding" title="Transfer-Encoding">Section 3.3.1</a> of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>) or <a href="#header.message-encoding" class="smpl">Message-Encoding</a> header field.
+         </p>
+         <div id="rfc.figure.u.1"></div>
+         <p>A message body <em class="bcp14">MAY</em> contain both transfer coding(s) and message coding(s). For example,
+         </p><pre class="text">	Message-Encoding: gzip
+	Transfer-Encoding: chunked
+	</pre><p>indicates that the payload body has been compressed using the gzip message coding and then chunked using the chunked transfer
+            coding while forming the message body.
+         </p>
+      </div>
+      <div id="header.message-encoding">
+         <div id="rfc.iref.m.1"></div>
+         <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a>&nbsp;<a href="#header.message-encoding">Message-Encoding</a></h1>
+         <p id="rfc.section.5.p.1">The Message-Encoding header field lists the message coding names corresponding to the sequence of message codings that have
+            been (or will be) applied to the payload body in order to form the message body. Message codings are defined in <a href="#message.codings" title="Message Codings">Section&nbsp;6</a>.
+         </p>
+         <div id="rfc.figure.u.2"></div><pre class="inline"><span id="rfc.iref.g.1"></span>        <a href="#header.message-encoding" class="smpl">Message-Encoding</a> = 1#<a href="#message.codings" class="smpl">message-coding</a>
+      </pre><div id="rfc.figure.u.3"></div>
+         <p>Multiple message codings <em class="bcp14">MAY</em> be applied to a message. For example,
+         </p><pre class="text">	Message-Encoding: foo, gzip
+	</pre><p>indicates that the payload body has been encoded using the foo coding and then compressed using the gzip coding while forming
+            the message body; where, for example, foo is a coding that increases the compressibility of the message.
+         </p>
+         <p id="rfc.section.5.p.4">Message-Encoding is analogous to HTTP <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#header.transfer-encoding" class="smpl">Transfer-Encoding</a> (<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#header.transfer-encoding" title="Transfer-Encoding">Section 3.3.1</a> of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>). The key difference between Message-Encoding and Transfer-Encoding is that Message-Encoding is an end-to-end header field
+            while Transfer-Encoding is a hop-to-hop header field. While transfer codings may be added or removed by any intermediary in
+            the HTTP connection, intermediaries must follow the strict requirements defined in <a href="#header.message-encoding.intermediaries" title="Intermediaries">Section&nbsp;5.1</a> with respect to message codings.
+         </p>
+         <p id="rfc.section.5.p.5">All message coding(s), if any, <em class="bcp14">MUST</em> be applied before transfer coding(s), if any.
+         </p>
+         <p id="rfc.section.5.p.6">Message-Encoding <em class="bcp14">MAY</em> be sent in a response to a HEAD request or in a <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p4-conditional.html#status.304" class="smpl">304 (Not Modified)</a> response (<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p4-conditional.html#status.304" title="304 Not Modified">Section 4.1</a> of <a href="#HTTP-p4"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Conditional Requests">[HTTP-p4]</cite></a>) to a GET request, neither of which includes a message body, to indicate that the origin server would have applied a message
+            coding to the message body if the request had been an unconditional GET.
+         </p>
+         <p id="rfc.section.5.p.7">A server <em class="bcp14">MUST NOT</em> send a Message-Encoding header field in any response with a status code of <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics.html#status.1xx" class="smpl">1xx
+               	(Informational)</a> or <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics.html#status.204" class="smpl">204 (No Content)</a>. A server <em class="bcp14">MUST NOT</em> send a Message-Encoding header field in any <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics.html#status.2xx" class="smpl">2xx (Successful)</a> response to a CONNECT request (<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics.html#CONNECT" title="CONNECT">Section 4.3.6</a> of <a href="#HTTP-p2"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[HTTP-p2]</cite></a>).
+         </p>
+         <p id="rfc.section.5.p.8">As Message-Encoding is an HTTP extension, a client <em class="bcp14">MUST NOT</em> send a request containing Message-Encoding unless it knows the server will handle the specific message coding(s); such knowledge
+            might be in the form of specific user configuration or by remembering the codings of a prior received response. A server <em class="bcp14">MUST NOT</em> send a response containing Message-Encoding unless the corresponding request indicates support in a ME header field.
+         </p>
+         <p id="rfc.section.5.p.9">A server that receives a request message with a message coding it does not understand <em class="bcp14">SHOULD</em> respond with <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics.html#status.501" class="smpl">501 (Not
+               	Implemented)</a>.
+         </p>
+         <div id="header.message-encoding.intermediaries">
+            <h2 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1</a>&nbsp;<a href="#header.message-encoding.intermediaries">Intermediaries</a></h2>
+            <p id="rfc.section.5.1.p.1">Intermediaries <em class="bcp14">MUST NOT</em> add message codings, however intermediaries <em class="bcp14">MAY</em> remove message codings if necessary. If desirable, an intermediary MAY remove one or more message codings and later re-encode
+               the payload body (or a portion thereof e.g. range), but the identical set of message codings <em class="bcp14">MUST</em> be applied in the same order as the original message body was received. For example, an intermediary might choose to remove
+               a gzip message coding (i.e. decompress) for local storage so that ranges might be more easily extracted and served. In this
+               case the intermediary could serve ranges from its uncompressed local copy of the content either without a message coding or
+               with gzip message coding, but not with any other message coding.
+            </p>
+         </div>
+      </div>
+      <div id="message.codings">
+         <h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a>&nbsp;<a href="#message.codings">Message Codings</a></h1>
+         <p id="rfc.section.6.p.1">Message coding names are used to indicate an encoding transformation that has been, can be, or might need to be applied to
+            a payload body. This differs from a content coding in that the message coding is a property of the message rather than a property
+            of the representation that is being messagered.
+         </p>
+         <div id="rfc.figure.u.4"></div><pre class="inline"><span id="rfc.iref.g.2"></span><span id="rfc.iref.g.3"></span>      <a href="#message.codings" class="smpl">message-coding</a> = "compress" ; <a href="#compress.coding" title="Compress Coding">Section&nbsp;7.1</a>
+      / "deflate" ; <a href="#deflate.coding" title="Deflate Coding">Section&nbsp;7.2</a>
+      / "gzip" ; <a href="#gzip.coding" title="Gzip Coding">Section&nbsp;7.3</a>
+      / <a href="#message.codings" class="smpl">message-extension</a>
+      <a href="#message.codings" class="smpl">message-extension</a> = <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.token.separators" class="smpl">token</a> *( <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.whitespace" class="smpl">OWS</a> ";" <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.whitespace" class="smpl">OWS</a> <a href="#rule.parameter" class="smpl">message-parameter</a> )
+      </pre><div id="rule.parameter">
+            <p id="rfc.section.6.p.3"> Parameters are in the form of a name or name=value pair.</p>
+         </div>
+         <div id="rfc.figure.u.5"></div><pre class="inline"><span id="rfc.iref.g.4"></span>      <a href="#rule.parameter" class="smpl">message-parameter</a> = <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.token.separators" class="smpl">token</a> <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.whitespace" class="smpl">BWS</a> "=" <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.whitespace" class="smpl">BWS</a> ( <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.token.separators" class="smpl">token</a> / <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.quoted-string" class="smpl">quoted-string</a> )
+      </pre><p id="rfc.section.6.p.5">All message-coding names are case-insensitive and ought to be registered within the HTTP Message Coding registry, as defined
+            in <a href="#message.coding.registry" title="Message Coding Registry">Section&nbsp;9</a>. They are used in the <a href="#header.me" class="smpl">ME</a> (<a href="#header.me" id="rfc.xref.header.me.1" title="ME">Section&nbsp;8</a>) and <a href="#header.message-encoding" class="smpl">Message-Encoding</a> (<a href="#header.message-encoding" id="rfc.xref.header.message-encoding.2" title="Message-Encoding">Section&nbsp;5</a>) header fields.
+         </p>
+      </div>
+      <div id="compression.codings">
+         <h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a>&nbsp;<a href="#compression.codings">Compression Codings</a></h1>
+         <p id="rfc.section.7.p.1">The codings defined below can be used to compress the payload of a message.</p>
+         <div id="compress.coding">
+            <div id="rfc.iref.c.1"></div>
+            <h2 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1</a>&nbsp;<a href="#compress.coding">Compress Coding</a></h2>
+            <p id="rfc.section.7.1.p.1">The "compress" coding is an adaptive Lempel-Ziv-Welch (LZW) coding <a href="#Welch"><cite title="A Technique for High Performance Data Compression">[Welch]</cite></a> that is commonly produced by the UNIX file compression program "compress". A recipient <em class="bcp14">SHOULD</em> consider "x-compress" to be equivalent to "compress".
+            </p>
+         </div>
+         <div id="deflate.coding">
+            <div id="rfc.iref.d.1"></div>
+            <h2 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2</a>&nbsp;<a href="#deflate.coding">Deflate Coding</a></h2>
+            <p id="rfc.section.7.2.p.1">The "deflate" coding is a "zlib" data format <a href="#RFC1950"><cite title="ZLIB Compressed Data Format Specification version 3.3">[RFC1950]</cite></a> containing a "deflate" compressed data stream <a href="#RFC1951"><cite title="DEFLATE Compressed Data Format Specification version 1.3">[RFC1951]</cite></a> that uses a combination of the Lempel-Ziv (LZ77) compression algorithm and Huffman coding.
+            </p>
+            <div class="note" id="rfc.section.7.2.p.2">
+               <p><b>Note:</b> Some non-conformant implementations send the "deflate" compressed data without the zlib wrapper.
+               </p> 
+            </div>
+         </div>
+         <div id="gzip.coding">
+            <div id="rfc.iref.g.5"></div>
+            <h2 id="rfc.section.7.3"><a href="#rfc.section.7.3">7.3</a>&nbsp;<a href="#gzip.coding">Gzip Coding</a></h2>
+            <p id="rfc.section.7.3.p.1">The "gzip" coding is an LZ77 coding with a 32 bit CRC that is commonly produced by the gzip file compression program <a href="#RFC1952"><cite title="GZIP file format specification version 4.3">[RFC1952]</cite></a>. A recipient <em class="bcp14">SHOULD</em> consider "x-gzip" to be equivalent to "gzip".
+            </p>
+         </div>
+      </div>
+      <div id="header.me">
+         <div id="rfc.iref.m.2"></div>
+         <h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a>&nbsp;<a href="#header.me">ME</a></h1>
+         <p id="rfc.section.8.p.1">The "ME" header field in a request indicates what message codings the client is willing to accept in a response.</p>
+         <p id="rfc.section.8.p.2">The ME field-value consists of a comma-separated list of message coding names, each allowing for optional parameters (as described
+            in <a href="#message.codings" title="Message Codings">Section&nbsp;6</a>).
+         </p>
+         <div id="rfc.figure.u.6"></div><pre class="inline"><span id="rfc.iref.g.6"></span><span id="rfc.iref.g.7"></span><span id="rfc.iref.g.8"></span><span id="rfc.iref.g.9"></span>      <a href="#header.me" class="smpl">ME</a>        = #<a href="#header.me" class="smpl">m-codings</a>
+      <a href="#header.me" class="smpl">m-codings</a> = ( <a href="#message.codings" class="smpl">message-coding</a> [ <a href="#header.me" class="smpl">m-ranking</a> ] )
+      <a href="#header.me" class="smpl">m-ranking</a> = <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.whitespace" class="smpl">OWS</a> ";" <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#rule.whitespace" class="smpl">OWS</a> "q=" <a href="#header.me" class="smpl">rank</a>
+      <a href="#header.me" class="smpl">rank</a>      = ( "0" [ "." 0*3<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#core.rules" class="smpl">DIGIT</a> ] )
+      / ( "1" [ "." 0*3("0") ] )
+      </pre><p id="rfc.section.8.p.4">Three examples of ME use are below.</p>
+         <div id="rfc.figure.u.7"></div><pre class="text">	ME: gzip
+	ME:
+	ME: gzip;q=0.5
+      </pre><p id="rfc.section.8.p.6">When multiple message codings are acceptable, the client <em class="bcp14">MAY</em> rank the codings by preference using a case-insensitive "q" parameter (similar to the qvalues used in content negotiation
+            fields, <a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics.html#quality.values" title="Quality Values">Section 5.3.1</a> of <a href="#HTTP-p2"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[HTTP-p2]</cite></a>). The rank value is a real number in the range 0 through 1, where 0.001 is the least preferred and 1 is the most preferred;
+            a value of 0 means "not acceptable".
+         </p>
+         <p id="rfc.section.8.p.7">If the ME field-value is empty or if no ME field is present, there are no acceptable message codings. A message with no message
+            coding is always acceptable.
+         </p>
+      </div>
+      <div id="message.coding.registry">
+         <h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a>&nbsp;<a href="#message.coding.registry">Message Coding Registry</a></h1>
+         <p id="rfc.section.9.p.1">The HTTP Message Coding Registry defines the name space for message coding names. It is maintained at &lt;<a href="http://www.iana.org/assignments/http-parameters">http://www.iana.org/assignments/http-parameters</a>&gt;.
+         </p>
+         <div id="message.coding.registry.procedure">
+            <h2 id="rfc.section.9.1"><a href="#rfc.section.9.1">9.1</a>&nbsp;<a href="#message.coding.registry.procedure">Procedure</a></h2>
+            <p id="rfc.section.9.1.p.1">Registrations <em class="bcp14">MUST</em> include the following fields: 
+            </p>
+            <ul>
+               <li>Name</li>
+               <li>Description</li>
+               <li>Pointer to specification text</li>
+            </ul>
+            <p id="rfc.section.9.1.p.2">Names of message codings <em class="bcp14">MUST NOT</em> overlap with names of content codings (<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p2-semantics.html#content.codings" title="Content Codings">Section 3.1.2.1</a> of <a href="#HTTP-p2"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[HTTP-p2]</cite></a>) or transfer codings (<a href="https://svn.tools.ietf.org/svn/wg/httpbis/draft-ietf-httpbis/26/p1-messaging.html#transfer.codings" title="Transfer Codings">Section 4</a> of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>) unless the encoding transformation is identical, as is the case for the compression codings defined in <a href="#compression.codings" title="Compression Codings">Section&nbsp;7</a>.
+            </p>
+            <p id="rfc.section.9.1.p.3">Values to be added to this name space require IETF Review (see <a href="http://tools.ietf.org/html/rfc5226#section-4.1">Section 4.1</a> of <a href="#RFC5226"><cite title="Guidelines for Writing an IANA Considerations Section in RFCs">[RFC5226]</cite></a>), and <em class="bcp14">MUST</em> conform to the purpose of message coding defined in this specification.
+            </p>
+            <p id="rfc.section.9.1.p.4">Use of program names for the identification of encoding formats is not desirable and is discouraged for future encodings.</p>
+         </div>
+         <div id="message.coding.registration">
+            <h2 id="rfc.section.9.2"><a href="#rfc.section.9.2">9.2</a>&nbsp;<a href="#message.coding.registration">Registration</a></h2>
+            <p id="rfc.section.9.2.p.1">The HTTP Message Coding Registry shall be updated with the registrations below:</p>
+            <div id="rfc.table.1">
+               <div id="iana.message.coding.registration.table"></div>
+               <table class="tt full left" cellpadding="3" cellspacing="0">
+                  <thead>
+                     <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Reference</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td class="left">compress</td>
+                        <td class="left">UNIX "compress" data format <a href="#Welch"><cite title="A Technique for High Performance Data Compression">[Welch]</cite></a></td>
+                        <td class="left"><a href="#compress.coding" title="Compress Coding">Section&nbsp;7.1</a> 
+                        </td>
+                     </tr>
+                     <tr>
+                        <td class="left">deflate</td>
+                        <td class="left">"deflate" compressed data (<a href="#RFC1951"><cite title="DEFLATE Compressed Data Format Specification version 1.3">[RFC1951]</cite></a>) inside the "zlib" data format (<a href="#RFC1950"><cite title="ZLIB Compressed Data Format Specification version 3.3">[RFC1950]</cite></a>)
+                        </td>
+                        <td class="left"><a href="#deflate.coding" title="Deflate Coding">Section&nbsp;7.2</a> 
+                        </td>
+                     </tr>
+                     <tr>
+                        <td class="left">gzip</td>
+                        <td class="left">GZIP file format <a href="#RFC1952"><cite title="GZIP file format specification version 4.3">[RFC1952]</cite></a></td>
+                        <td class="left"><a href="#gzip.coding" title="Gzip Coding">Section&nbsp;7.3</a> 
+                        </td>
+                     </tr>
+                     <tr>
+                        <td class="left">x-compress</td>
+                        <td class="left">Deprecated (alias for compress)</td>
+                        <td class="left"><a href="#compress.coding" title="Compress Coding">Section&nbsp;7.1</a> 
+                        </td>
+                     </tr>
+                     <tr>
+                        <td class="left">x-gzip</td>
+                        <td class="left">Deprecated (alias for gzip)</td>
+                        <td class="left"><a href="#gzip.coding" title="Gzip Coding">Section&nbsp;7.3</a> 
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+      <div>
+         <h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a>&nbsp;Security Considerations
+         </h1>
+         <p id="rfc.section.10.p.1">TBD</p>
+      </div>
+      <div>
+         <h1 id="rfc.section.11"><a href="#rfc.section.11">11.</a>&nbsp;IANA Considerations
+         </h1>
+         <p id="rfc.section.11.p.1">TBD</p>
+      </div>
+      <div>
+         <h1 id="rfc.section.12"><a href="#rfc.section.12">12.</a>&nbsp;Acknowledgements
+         </h1>
+      </div>
+      <h1 id="rfc.references"><a id="rfc.section.13" href="#rfc.section.13">13.</a> References
+      </h1>
+      <h2 id="rfc.references.1"><a href="#rfc.section.13.1" id="rfc.section.13.1">13.1</a> Normative References
+      </h2>
+      <table>
+         <tr>
+            <td class="reference"><b id="HTTP-p1">[HTTP-p1]</b></td>
+            <td class="top"><a href="mailto:fielding@gbiv.com" title="Adobe Systems Incorporated">Fielding, R., Ed.</a> and <a href="mailto:julian.reschke@greenbytes.de" title="greenbytes GmbH">J. Reschke, Ed.</a>, “<a href="http://tools.ietf.org/html/draft-ietf-httpbis-p1-messaging-26">Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing</a>”, Internet-Draft&nbsp;draft-ietf-httpbis-p1-messaging-26 (work in progress), February&nbsp;2014.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="HTTP-p2">[HTTP-p2]</b></td>
+            <td class="top"><a href="mailto:fielding@gbiv.com" title="Adobe Systems Incorporated">Fielding, R., Ed.</a> and <a href="mailto:julian.reschke@greenbytes.de" title="greenbytes GmbH">J. Reschke, Ed.</a>, “<a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-26">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>”, Internet-Draft&nbsp;draft-ietf-httpbis-p2-semantics-26 (work in progress), February&nbsp;2014.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="HTTP-p4">[HTTP-p4]</b></td>
+            <td class="top"><a href="mailto:fielding@gbiv.com" title="Adobe Systems Incorporated">Fielding, R., Ed.</a> and <a href="mailto:julian.reschke@greenbytes.de" title="greenbytes GmbH">J. Reschke, Ed.</a>, “<a href="http://tools.ietf.org/html/draft-ietf-httpbis-p4-conditional-26">Hypertext Transfer Protocol (HTTP/1.1): Conditional Requests</a>”, Internet-Draft&nbsp;draft-ietf-httpbis-p4-conditional-26 (work in progress), February&nbsp;2014.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="RFC1950">[RFC1950]</b></td>
+            <td class="top"><a href="mailto:ghost@aladdin.com" title="Aladdin Enterprises">Deutsch, L.</a> and J-L. Gailly, “<a href="http://tools.ietf.org/html/rfc1950">ZLIB Compressed Data Format Specification version 3.3</a>”, RFC&nbsp;1950, May&nbsp;1996.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="RFC1951">[RFC1951]</b></td>
+            <td class="top"><a href="mailto:ghost@aladdin.com" title="Aladdin Enterprises">Deutsch, P.</a>, “<a href="http://tools.ietf.org/html/rfc1951">DEFLATE Compressed Data Format Specification version 1.3</a>”, RFC&nbsp;1951, May&nbsp;1996.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="RFC1952">[RFC1952]</b></td>
+            <td class="top"><a href="mailto:ghost@aladdin.com" title="Aladdin Enterprises">Deutsch, P.</a>, <a href="mailto:gzip@prep.ai.mit.edu">Gailly, J-L.</a>, <a href="mailto:madler@alumni.caltech.edu">Adler, M.</a>, <a href="mailto:ghost@aladdin.com">Deutsch, L.</a>, and <a href="mailto:randeg@alumni.rpi.edu">G. Randers-Pehrson</a>, “<a href="http://tools.ietf.org/html/rfc1952">GZIP file format specification version 4.3</a>”, RFC&nbsp;1952, May&nbsp;1996.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="RFC2119">[RFC2119]</b></td>
+            <td class="top"><a href="mailto:sob@harvard.edu" title="Harvard University">Bradner, S.</a>, “<a href="http://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>”, BCP&nbsp;14, RFC&nbsp;2119, March&nbsp;1997.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="RFC5226">[RFC5226]</b></td>
+            <td class="top">Narten, T. and H. Alvestrand, “<a href="http://tools.ietf.org/html/rfc5226">Guidelines for Writing an IANA Considerations Section in RFCs</a>”, BCP&nbsp;26, RFC&nbsp;5226, May&nbsp;2008.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="Welch">[Welch]</b></td>
+            <td class="top">Welch, T., “A Technique for High Performance Data Compression”, IEEE Computer&nbsp;17(6), June&nbsp;1984.</td>
+         </tr>
+      </table>
+      <h2 id="rfc.references.2"><a href="#rfc.section.13.2" id="rfc.section.13.2">13.2</a> Informative References
+      </h2>
+      <table>
+         <tr>
+            <td class="reference"><b id="BREACH">[BREACH]</b></td>
+            <td class="top">Gluck, Y., Harris, N., and A. Prado, “<a href="http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf">BREACH: Reviving the CRIME Attack</a>”, July&nbsp;2013, &lt;<a href="http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf">http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf</a>&gt;.
+            </td>
+         </tr>
+      </table>
+      <div class="avoidbreak">
+         <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
+         <p><b>Keith Morgan</b><br>International Atomic Energy Agency<br>Email: <a href="mailto:k.morgan@iaea.org">k.morgan@iaea.org</a></p>
+         <p><b>Chris Brunhuber</b><br>International Atomic Energy Agency<br>Email: <a href="mailto:c.brunhuber@iaea.org">c.brunhuber@iaea.org</a></p>
+      </div>
+   </body>
+</html>
