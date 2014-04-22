@@ -339,7 +339,7 @@ samp, tt, code, pre {
        content: "Morgan & Brunhuber";
   }
   @bottom-center {
-       content: "Expires October 20, 2014";
+       content: "Expires October 24, 2014";
   }
   @bottom-right {
        content: "[Page " counter(page) "]";
@@ -379,9 +379,9 @@ samp, tt, code, pre {
       <meta name="dct.creator" content="Morgan, K.">
       <meta name="dct.creator" content="Brunhuber, C.">
       <meta name="dct.identifier" content="urn:ietf:id:draft-morgan-http-message-encoding-00">
-      <meta name="dct.issued" scheme="ISO8601" content="2014-04-18">
-      <meta name="dct.abstract" content="Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However, there are some use cases where Content-Encoding cannot (or event should not) be used e.g. dynamic compression of a range, etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. BREACH) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries. This document is an extension to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged. This document should be discussed on the ietf-http-wg@w3.org mailing list, although it is not a work item of the HTTPbis WG.">
-      <meta name="description" content="Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However, there are some use cases where Content-Encoding cannot (or event should not) be used e.g. dynamic compression of a range, etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. BREACH) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries. This document is an extension to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged. This document should be discussed on the ietf-http-wg@w3.org mailing list, although it is not a work item of the HTTPbis WG.">
+      <meta name="dct.issued" scheme="ISO8601" content="2014-04-22">
+      <meta name="dct.abstract" content="Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However, there are some use cases where Content-Encoding cannot (or even should not) be used e.g. dynamic compression of a range, etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. BREACH) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries. This document is an extension to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged. This document should be discussed on the ietf-http-wg@w3.org mailing list, although it is not a work item of the HTTPbis WG.">
+      <meta name="description" content="Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However, there are some use cases where Content-Encoding cannot (or even should not) be used e.g. dynamic compression of a range, etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. BREACH) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries. This document is an extension to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged. This document should be discussed on the ietf-http-wg@w3.org mailing list, although it is not a work item of the HTTPbis WG.">
    </head>
    <body>
       <table class="header">
@@ -399,16 +399,16 @@ samp, tt, code, pre {
                <td class="right">IAEA</td>
             </tr>
             <tr>
-               <td class="left">Expires: October 20, 2014</td>
-               <td class="right">April 18, 2014</td>
+               <td class="left">Expires: October 24, 2014</td>
+               <td class="right">April 22, 2014</td>
             </tr>
          </tbody>
       </table>
       <p class="title">HTTP Message-Encoding<br><span class="filename">draft-morgan-http-message-encoding-00</span></p>
       <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
       <p>Compression of Hypertext Transfer Protocol (HTTP) message content is typically accomplished with Content-Encoding. However,
-         there are some use cases where Content-Encoding cannot (or event should not) be used e.g. dynamic compression of a range,
-         etc. The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. <a href="#BREACH">BREACH</a> <cite title="BREACH: Reviving the CRIME Attack">[BREACH]</cite>) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries
+         there are some use cases where Content-Encoding cannot (or even should not) be used e.g. dynamic compression of a range, etc.
+         The HTTP Transfer-Encoding mechanism suits these cases quite well, but in light of recent security vulnerabilities (e.g. <a href="#BREACH">BREACH</a> <cite title="BREACH: Reviving the CRIME Attack">[BREACH]</cite>) which exploit compression, Transfer-Encoding is eschewed because its hop-to-hop nature allows blanket compression by intermediaries
          which likely lack the proper context for deciding if it is safe to compress. This document introduces Message-Encoding, an
          analogue to Transfer-Encoding, but with end-to-end encoding and strict transformation rules related to intermediaries.
       </p>
@@ -424,7 +424,7 @@ samp, tt, code, pre {
             documents at any time. It is inappropriate to use Internet-Drafts as reference material or to cite them other than as “work
             in progress”.
          </p>
-         <p>This Internet-Draft will expire on October 20, 2014.</p>
+         <p>This Internet-Draft will expire on October 24, 2014.</p>
       </div>
       <div id="rfc.copyrightnotice">
          <h1><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
@@ -552,7 +552,7 @@ samp, tt, code, pre {
          </p>
          <div id="header.message-encoding.intermediaries">
             <h2 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1</a>&nbsp;<a href="#header.message-encoding.intermediaries">Intermediaries</a></h2>
-            <p id="rfc.section.5.1.p.1">Intermediaries <em class="bcp14">MUST NOT</em> add message codings, however intermediaries <em class="bcp14">MAY</em> remove message codings if necessary. If desirable, an intermediary MAY remove one or more message codings and later re-encode
+            <p id="rfc.section.5.1.p.1">Intermediaries <em class="bcp14">SHOULD NOT</em> add message codings, however intermediaries <em class="bcp14">MAY</em> remove message codings if necessary. If desirable, an intermediary MAY remove one or more message codings and later re-encode
                the payload body (or a portion thereof e.g. range), but the identical set of message codings <em class="bcp14">MUST</em> be applied in the same order as the original message body was received. For example, an intermediary might choose to remove
                a gzip message coding (i.e. decompress) for local storage so that ranges might be more easily extracted and served. In this
                case the intermediary could serve ranges from its uncompressed local copy of the content either without a message coding or

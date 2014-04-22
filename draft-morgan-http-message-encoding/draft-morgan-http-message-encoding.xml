@@ -69,7 +69,7 @@
 	Compression of Hypertext Transfer Protocol (HTTP) message
 	content is typically accomplished with
 	Content-Encoding. However, there are some use cases where
-	Content-Encoding cannot (or event should not) be used
+	Content-Encoding cannot (or even should not) be used
 	e.g. dynamic compression of a range, etc. The HTTP
 	Transfer-Encoding mechanism suits these cases quite well, but
 	in light of recent security vulnerabilities (e.g. <xref
@@ -246,7 +246,7 @@
       </t>
       <section title="Intermediaries" anchor="header.message-encoding.intermediaries">
 	<t>
-	  Intermediaries &MUST-NOT; add message codings, however 
+	  Intermediaries &SHOULD-NOT; add message codings, however 
 	  intermediaries &MAY; remove message codings if necessary.  
 	  If desirable, an intermediary MAY remove one or more 
 	  message codings and later re-encode the payload body (or 
