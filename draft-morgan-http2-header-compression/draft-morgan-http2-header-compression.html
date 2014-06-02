@@ -1,0 +1,844 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+   <head profile="http://dublincore.org/documents/2008/08/04/dc-html/">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>H2EZ: HTTP/2 Header Compression</title><script>
+var buttonsAdded = false;
+
+function initFeedback() {
+  var fb = document.createElement("div");
+  fb.className = "feedback noprint";
+  fb.setAttribute("onclick", "feedback();");
+  fb.appendChild(document.createTextNode("feedback"));
+
+  var bodyl = document.getElementsByTagName("body");
+  bodyl.item(0).appendChild(fb);
+}
+
+function feedback() {
+  toggleButtonsToElementsByName("h1");
+  toggleButtonsToElementsByName("h2");
+  toggleButtonsToElementsByName("h3");
+  toggleButtonsToElementsByName("h4");
+
+  buttonsAdded = !buttonsAdded;
+}
+
+function toggleButtonsToElementsByName(name) {
+  var list = document.getElementsByTagName(name);
+  for (var i = 0; i < list.length; i++) {
+    toggleButton(list.item(i));
+  }
+}
+
+function toggleButton(node) {
+  if (! buttonsAdded) {
+
+    // docname
+    var template = "mailto:k.morgan@iaea.org?subject={docname},%20%22{section}%22&body=<{ref}>:";
+
+    var id = node.getAttribute("id");
+    // better id available?
+    var titlelinks = node.getElementsByTagName("a");
+    for (var i = 0; i < titlelinks.length; i++) {
+      var tl = titlelinks.item(i);
+      if (tl.getAttribute("id")) {
+        id = tl.getAttribute("id");
+      }
+    }
+
+    // ref
+    var ref = window.location.toString();
+    var hash = ref.indexOf("#");
+    if (hash != -1) {
+      ref = ref.substring(0, hash);
+    }
+    if (id != "") {
+      ref += "#" + id;
+    }
+
+    // docname
+    var docname = "draft-morgan-http2-header-compression-latest";
+
+    // section
+    var section = node.textContent;
+    section = section.replace("\u00a0", " ");
+
+    // build URI from template
+    var uri = template.replace("{docname}", encodeURIComponent(docname));
+    uri = uri.replace("{section}", encodeURIComponent(section));
+    uri = uri.replace("{ref}", encodeURIComponent(ref));
+
+    var button = document.createElement("a");
+    button.className = "fbbutton noprint";
+    button.setAttribute("href", uri);
+    button.appendChild(document.createTextNode("send feedback"));
+    node.appendChild(button);
+  }
+  else {
+    var buttons = node.getElementsByTagName("a");
+    for (var i = 0; i < buttons.length; i++) {
+      var b = buttons.item(i);
+      if (b.className == "fbbutton noprint") {
+        node.removeChild(b);
+      }
+    }
+  }
+}</script><style type="text/css" title="Xml2Rfc (sans serif)">
+a {
+  text-decoration: none;
+}
+a.smpl {
+  color: black;
+}
+a:hover {
+  text-decoration: underline;
+}
+a:active {
+  text-decoration: underline;
+}
+address {
+  margin-top: 1em;
+  margin-left: 2em;
+  font-style: normal;
+}
+body {
+  color: black;
+  font-family: cambria, helvetica, arial, sans-serif;
+  font-size: 11pt;
+  margin-right: 2em;
+}
+cite {
+  font-style: normal;
+}
+dl {
+  margin-left: 2em;
+}
+ul.empty {
+  list-style-type: none;
+}
+ul.empty li {
+  margin-top: .5em;
+}
+dl p {
+  margin-left: 0em;
+}
+dt {
+  margin-top: .5em;
+}
+h1 {
+  font-size: 130%;
+  line-height: 21pt;
+  page-break-after: avoid;
+}
+h1.np {
+  page-break-before: always;
+}
+h2 {
+  font-size: 120%;
+  line-height: 15pt;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 110%;
+  page-break-after: avoid;
+}
+h4, h5, h6 {
+  page-break-after: avoid;
+}
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+  color: black;
+}
+img {
+  margin-left: 3em;
+}
+li {
+  margin-left: 2em;
+}
+ol {
+  margin-left: 2em;
+}
+ol.la {
+  list-style-type: lower-alpha;
+}
+ol.ua {
+  list-style-type: upper-alpha;
+}
+ol p {
+  margin-left: 0em;
+}
+p {
+  margin-left: 2em;
+}
+pre {
+  margin-left: 3em;
+  background-color: lightyellow;
+  padding: .25em;
+  page-break-inside: avoid;
+}
+pre.text2 {
+  border-style: dotted;
+  border-width: 1px;
+  background-color: #f0f0f0;
+  width: 69em;
+}
+pre.inline {
+  background-color: white;
+  padding: 0em;
+}
+pre.text {
+  border-style: dotted;
+  border-width: 1px;
+  background-color: #f8f8f8;
+  width: 69em;
+}
+pre.drawing {
+  border-style: solid;
+  border-width: 1px;
+  background-color: #f8f8f8;
+  padding: 2em;
+}
+table {
+  margin-left: 2em;
+}
+table.header {
+  border-spacing: 1px;
+  width: 95%;
+  font-size: 11pt;
+  color: white;
+}
+td.top {
+  vertical-align: top;
+}
+td.topnowrap {
+  vertical-align: top;
+  white-space: nowrap;
+}
+table.header td {
+  background-color: gray;
+  width: 50%;
+}
+td.reference {
+  vertical-align: top;
+  white-space: nowrap;
+  padding-right: 1em;
+}
+thead {
+  display:table-header-group;
+}
+ul.toc, ul.toc ul {
+  list-style: none;
+  margin-left: 1.5em;
+  padding-left: 0em;
+}
+ul.toc li {
+  line-height: 150%;
+  font-weight: bold;
+  margin-left: 0em;
+}
+ul.toc li li {
+  line-height: normal;
+  font-weight: normal;
+  font-size: 10pt;
+  margin-left: 0em;
+}
+li.excluded {
+  font-size: 0pt;
+}
+ul p {
+  margin-left: 0em;
+}
+.title, .filename, h1, h2, h3, h4 {
+  font-family: candara, helvetica, arial, sans-serif;
+}
+samp, tt, code, pre {
+  font: consolas, monospace;
+}
+
+.comment {
+  background-color: yellow;
+}
+.center {
+  text-align: center;
+}
+.error {
+  color: red;
+  font-style: italic;
+  font-weight: bold;
+}
+.figure {
+  font-weight: bold;
+  text-align: center;
+  font-size: 10pt;
+}
+.filename {
+  color: #333333;
+  font-size: 75%;
+  font-weight: bold;
+  line-height: 21pt;
+  text-align: center;
+}
+.fn {
+  font-weight: bold;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+.title {
+  color: green;
+  font-size: 150%;
+  line-height: 18pt;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 36pt;
+}
+.warning {
+  font-size: 130%;
+  background-color: yellow;
+}
+.feedback {
+  position: fixed;
+  bottom: 1%;
+  right: 1%;
+  padding: 3px 5px;
+  color: white;
+  border-radius: 5px;
+  background: #a00000;
+  border: 1px solid silver;
+}
+.fbbutton {
+  margin-left: 1em;
+  color: #303030;
+  font-size: small;
+  font-weight: normal;
+  background: #d0d000;
+  padding: 1px 4px;
+  border: 1px solid silver;
+  border-radius: 5px;
+}
+
+@media print {
+  .noprint {
+    display: none;
+  }
+
+  a {
+    color: black;
+    text-decoration: none;
+  }
+
+  table.header {
+    width: 90%;
+  }
+
+  td.header {
+    width: 50%;
+    color: black;
+    background-color: white;
+    vertical-align: top;
+    font-size: 110%;
+  }
+
+  ul.toc a:nth-child(2)::after {
+    content: leader('.') target-counter(attr(href), page);
+  }
+
+  ul.ind li li a {
+    content: target-counter(attr(href), page);
+  }
+
+  .print2col {
+    column-count: 2;
+    -moz-column-count: 2;
+    column-fill: auto;
+  }
+}
+
+@page {
+  @top-left {
+       content: "Internet-Draft";
+  }
+  @top-right {
+       content: "June 2014";
+  }
+  @top-center {
+       content: "H2EZ";
+  }
+  @bottom-left {
+       content: "Morgan & Brunhuber";
+  }
+  @bottom-center {
+       content: "Expires December 4, 2014";
+  }
+  @bottom-right {
+       content: "[Page " counter(page) "]";
+  }
+}
+
+@page:first {
+    @top-left {
+      content: normal;
+    }
+    @top-right {
+      content: normal;
+    }
+    @top-center {
+      content: normal;
+    }
+}
+</style><style tyle="text/css">@viewport {   zoom: 1.0;   width: extend-to-zoom; }  @-ms-viewport {   width: extend-to-zoom;   zoom: 1.0; }  body {   font: 11pt cambria, helvetica, arial, sans-serif;   font-size-adjust: 0.5;   line-height: 130%;   margin: 1em auto;   max-width: 700px; }  .title, .filename, h1, h2, h3, h4 {   font-family: candara, helvetica, arial, sans-serif;   font-size-adjust: 0.5; } .title { font-size: 150%; } h1 { font-size: 130%; } h2 { font-size: 120%; } h3, h4 { font-size: 110%; } ul.toc >li { font-size: 95%; } ul.toc >li >ul, .figure, caption { font-size: 90%; }  table {   margin-left: 0em; } table.header {   width: 100%; }  table.header td {   background-color: inherit;   color: black; }  samp, tt, code, pre {   font: 11pt consolas, monospace;   font-size-adjust: none; }  pre.text, pre.text2 {   width: 90%; }  dt {   float: left; clear: left;   margin: 0.5em 0.5em 0 0; } dt:first-child {   margin-top: 0; } dd {   margin: 0.5em 0 0 2em; } dd p, dd ul {   margin-top: 0; margin-bottom: 0; } dd *+p {   margin-top: 0.5em; }  ol, ul {   padding: 0;   margin: 0.5em 0 0.5em 2em; } ul.toc, ul.toc ul {    margin: 0 0 0 1.5em; } ul.toc a:first-child {    display: inline-block;    min-width: 1.2em; }</style><link rel="Contents" href="#rfc.toc">
+      <link rel="Author" href="#rfc.authors">
+      <link rel="Copyright" href="#rfc.copyrightnotice">
+      <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+      <link rel="Chapter" title="2 Detailed Header Format" href="#rfc.section.2">
+      <link rel="Chapter" title="3 EZFLATE Tokenization Rules" href="#rfc.section.3">
+      <link rel="Chapter" title="4 Security Considerations" href="#rfc.section.4">
+      <link rel="Chapter" title="5 Acknowledgements" href="#rfc.section.5">
+      <link rel="Chapter" href="#rfc.section.6" title="6 References">
+      <meta name="generator" content="http://greenbytes.de/tech/webdav/rfc2629.xslt, Revision 1.629, 2014/04/17 09:22:01, XSLT vendor: SAXON 8.9.0.4 from Saxonica http://www.saxonica.com/">
+      <meta name="keywords" content="Compression, Header">
+      <link rel="schema.dct" href="http://purl.org/dc/terms/">
+      <meta name="dct.creator" content="Morgan, K.">
+      <meta name="dct.creator" content="Brunhuber, C.">
+      <meta name="dct.identifier" content="urn:ietf:id:draft-morgan-http2-header-compression-latest">
+      <meta name="dct.issued" scheme="ISO8601" content="2014-06-02">
+      <meta name="dct.abstract" content="This specification defines the format and compression of HTTP header fields in HTTP/2. The compression is based on EZFLATE, which is a token-based DEFLATE algorithm for secure compression within encrypted communication channels.">
+      <meta name="description" content="This specification defines the format and compression of HTTP header fields in HTTP/2. The compression is based on EZFLATE, which is a token-based DEFLATE algorithm for secure compression within encrypted communication channels.">
+   </head>
+   <body onload="initFeedback();">
+      <table class="header">
+         <tbody>
+            <tr>
+               <td class="left">HTTPbis</td>
+               <td class="right">K. Morgan</td>
+            </tr>
+            <tr>
+               <td class="left">Internet-Draft</td>
+               <td class="right">C. Brunhuber</td>
+            </tr>
+            <tr>
+               <td class="left">Intended status: Standards Track</td>
+               <td class="right">IAEA</td>
+            </tr>
+            <tr>
+               <td class="left">Expires: December 4, 2014</td>
+               <td class="right">June 2, 2014</td>
+            </tr>
+         </tbody>
+      </table>
+      <p class="title">H2EZ: HTTP/2 Header Compression<br><span class="filename">draft-morgan-http2-header-compression-latest</span></p>
+      <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
+      <p>This specification defines the format and compression of HTTP header fields in HTTP/2. The compression is based on EZFLATE,
+         which is a token-based DEFLATE algorithm for secure compression within encrypted communication channels.
+      </p>
+      <h1 id="rfc.note.1"><a href="#rfc.note.1">Editorial Note (To be removed by RFC Editor)</a></h1>
+      <p>Discussion of this draft takes place on the HTTPBIS working group mailing list (ietf-http-wg@w3.org), which is archived at &lt;<a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">http://lists.w3.org/Archives/Public/ietf-http-wg/</a>&gt;.
+      </p>
+      <p>Working Group information can be found at &lt;<a href="http://tools.ietf.org/wg/httpbis/">http://tools.ietf.org/wg/httpbis/</a>&gt;;
+      </p>
+      <div id="rfc.status">
+         <h1><a href="#rfc.status">Status of This Memo</a></h1>
+         <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+         <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF). Note that other groups may also distribute
+            working documents as Internet-Drafts. The list of current Internet-Drafts is at <a href="http://datatracker.ietf.org/drafts/current/">http://datatracker.ietf.org/drafts/current/</a>.
+         </p>
+         <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other
+            documents at any time. It is inappropriate to use Internet-Drafts as reference material or to cite them other than as “work
+            in progress”.
+         </p>
+         <p>This Internet-Draft will expire on December 4, 2014.</p>
+      </div>
+      <div id="rfc.copyrightnotice">
+         <h1><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
+         <p>Copyright © 2014 IETF Trust and the persons identified as the document authors. All rights reserved.</p>
+         <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of publication of this document. Please review these documents carefully, as they describe your rights
+            and restrictions with respect to this document. Code Components extracted from this document must include Simplified BSD License
+            text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified
+            BSD License.
+         </p>
+      </div>
+      <hr class="noprint">
+      <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+      <ul class="toc">
+         <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">Introduction</a></li>
+         <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#detailed.header.format">Detailed Header Format</a><ul>
+               <li><a href="#rfc.section.2.1">2.1</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.2.1">ASN.1 Octet String Examples</a><ul>
+                     <li><a href="#rfc.section.2.1.1">2.1.1</a>&nbsp;&nbsp;&nbsp;<a href="#octet.string.example.1">Example 1 (length 15)</a></li>
+                     <li><a href="#rfc.section.2.1.2">2.1.2</a>&nbsp;&nbsp;&nbsp;<a href="#octet.string.example.2">Example 2 (length 33)</a></li>
+                     <li><a href="#rfc.section.2.1.3">2.1.3</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.2.1.3">Example 3 (length 128)</a></li>
+                     <li><a href="#rfc.section.2.1.4">2.1.4</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.2.1.4">Example 4 (length 258)</a></li>
+                  </ul>
+               </li>
+            </ul>
+         </li>
+         <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#tokenization.rules">EZFLATE Tokenization Rules</a><ul>
+               <li><a href="#rfc.section.3.1">3.1</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.3.1">Header Name Tokenization</a></li>
+               <li><a href="#rfc.section.3.2">3.2</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.3.2">Header Value Tokenization</a></li>
+               <li><a href="#rfc.section.3.3">3.3</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.3.3">Tokenization Example</a></li>
+               <li><a href="#rfc.section.3.4">3.4</a>&nbsp;&nbsp;&nbsp;<a href="#sub-tokenization">Sub-Tokenization</a><ul>
+                     <li><a href="#rfc.section.3.4.1">3.4.1</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.3.4.1">Sub-Tokenization Example 1 (1292 octet token)</a></li>
+                     <li><a href="#rfc.section.3.4.2">3.4.2</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.3.4.2">Sub-Tokenization Example 2 (516 octet token)</a></li>
+                     <li><a href="#rfc.section.3.4.3">3.4.3</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.3.4.3">Sub-Tokenization Example 3 (259 octet token)</a></li>
+                  </ul>
+               </li>
+            </ul>
+         </li>
+         <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#Security">Security Considerations</a></li>
+         <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.5">Acknowledgements</a></li>
+         <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">References</a><ul>
+               <li><a href="#rfc.section.6.1">6.1</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references.1">Normative References</a></li>
+               <li><a href="#rfc.section.6.2">6.2</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references.2">Informative References</a></li>
+            </ul>
+         </li>
+         <li><a href="#rfc.authors">Authors' Addresses</a></li>
+      </ul>
+      <ul class="toc">
+         <li>Figures
+            
+            <ul>
+               <li><a href="#rfc.figure.1">Figure 1</a></li>
+               <li><a href="#rfc.figure.2">Figure 2</a></li>
+               <li><a href="#rfc.figure.3">Figure 3</a></li>
+               <li><a href="#rfc.figure.4">Figure 4</a></li>
+            </ul>
+         </li>
+      </ul>
+      <div id="introduction">
+         <h1 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a href="#introduction">Introduction</a></h1>
+         <p id="rfc.section.1.p.1">[TODO: A significant portion of text the 'introduction' and 'security considerations' sections, is completely lifted from
+            the HPACK Internet Draft; re-write or give credit somehow.]
+         </p>
+         <p id="rfc.section.1.p.2">In HTTP/1.1 (see <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>), header fields are encoded without any form of compression. As web pages have grown to include dozens to hundreds of requests,
+            the redundant header fields in these requests now measurably increase latency and unnecessarily consume bandwidth (see <a href="#PERF1"><cite title="IETF83: SPDY and What to Consider for HTTP/2.0">[PERF1]</cite></a> and <a href="#PERF2"><cite title="SPDY: What I Like About You">[PERF2]</cite></a>).
+         </p>
+         <p id="rfc.section.1.p.3">SPDY <a href="#SPDY"><cite title="SPDY Protocol">[SPDY]</cite></a> initially addressed this redundancy by compressing header fields using the DEFLATE format <a href="#DEFLATE"><cite title="DEFLATE Compressed Data Format Specification version 1.3">[DEFLATE]</cite></a>, which proved very effective at efficiently representing the redundant header fields. However, that approach exposed a security
+            risk as demonstrated by the CRIME attack (see <a href="#CRIME"><cite title="The CRIME Attack">[CRIME]</cite></a>).
+         </p>
+         <p id="rfc.section.1.p.4">A key observation of the CRIME and BREACH attacks is that they exploited the DEFLATE <em>algorithm</em> as described in RFC 1951 <a href="#DEFLATE"><cite title="DEFLATE Compressed Data Format Specification version 1.3">[DEFLATE]</cite></a>, not the DEFLATE <em>format</em> (also described in RFC 1951).
+         </p>
+         <p id="rfc.section.1.p.5">EZFLATE <a href="#EZFLATE"><cite title="EZFLATE: Token-based DEFLATE Compression">[EZFLATE]</cite></a>, is a token-based DEFLATE compression algorithm for secure compression within encrypted communication channels. The key feature
+            of the EZFLATE algorithm (and primary difference to the algorithm described in RFC 1951), is that LZ77 &lt;length, backward distance&gt;
+            tuples may only reference a duplicated token (octet string) occurring in a previous block, up to 32K input bytes before, if
+            the current token exactly matches in length <em>and</em> octet values. As shown in Section 3.1, "Take a Bite out of CRIME", of <a href="#EZFLATE"><cite title="EZFLATE: Token-based DEFLATE Compression">[EZFLATE]</cite></a>, this forces potential CRIME-like attackers to guess n-character secrets n characters at a time rather than one character
+            at a time, making the search space no worse than a full brute-force attack.
+         </p>
+         <p id="rfc.section.1.p.6">This document defines 1) the formatting of HTTP/2 header fields, and 2) how EZFLATE is used to compress HTTP/2 header fields.
+            Finally, this document also includes implementation recommendations.
+         </p>
+      </div>
+      <div id="detailed.header.format">
+         <h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a>&nbsp;<a href="#detailed.header.format">Detailed Header Format</a></h1>
+         <p id="rfc.section.2.p.1">In HTTP/1.1 <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a> headers are defined as field-name, field-value pairs (see Section 3.2, "Header Fields" of <a href="#HTTP-p1"><cite title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[HTTP-p1]</cite></a>). The field-name and field-value are separated from each other by a single ':' character followed by optional whitespace.
+            Each pair is separated by the two octet sequence CRLF (carriage return, line feed). The end of the header block is marked
+            by an empty line followed by CRLF.
+         </p>
+         <p id="rfc.section.2.p.2">In HTTP/2, the headers are still field-name, field-value pairs except that each are length-prefixed octet strings to simplify
+            parsing. In other words, the field-name and field-value are separately length-prefixed. In this way no separator is necessary
+            between the field-name and field-value and no separator is necessary between consecutive pairs. The end of the header block
+            is naturally defined as the end of a HTTP/2 HEADERS or PUSH_PROMISE frame with the END_HEADERS flag set <a href="#HTTP2"><cite title="Hypertext Transfer Protocol version 2">[HTTP2]</cite></a>.
+         </p>
+         <p id="rfc.section.2.p.3">Each field-name and field-value are encoded as an ASN.1 octet string <a href="#X.208-88"><cite title="Recommendation X.208: Specification of Abstract Syntax Notation One (ASN.1)">[X.208-88]</cite></a><a href="#X.209-88"><cite title="Recommendation X.209: Specification of Basic Encoding Rules for Abstract Syntax Notation One">[X.209-88]</cite></a>. This simply means the octets which compose a field-name or field-value are length-prefixed with a variable-length integer
+            which indicates the exact number of octets composing the original field-name or field-value.
+         </p>
+         <p id="rfc.section.2.p.4">For ASN.1 encoded octet-strings, the length prefix is composed of at least a single octet, and optionally N additional octets,
+            where N is exactly specified by the first octet as follows. If the length of the octets to be length-prefixed is less than
+            0x80 (128), then only a single octet is required for the length prefix and so the length-prefix octet is encoded as exactly
+            the length (big endian) of the octets to be length-prefixed. If the length of the octets to be length-prefixed is greater
+            than or equal to 0x80 (128), then the most significant bit of the first length-prefix octet is set (i.e. 0x80), and the remaining
+            7 bits specify the number of additional octets N (big endian) which will be added to encode the length, as an unsigned integer
+            (big endian), of the octets to be length-prefixed .
+         </p>
+         <div>
+            <h2 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1</a>&nbsp;ASN.1 Octet String Examples
+            </h2>
+            <p id="rfc.section.2.1.p.1">The following are examples of computing the length prefix for converting various octet strings to ASN.1 octet strings.</p>
+            <div id="octet.string.example.1">
+               <h3 id="rfc.section.2.1.1"><a href="#rfc.section.2.1.1">2.1.1</a>&nbsp;<a href="#octet.string.example.1">Example 1 (length 15)</a></h3>
+               <p id="rfc.section.2.1.1.p.1">The ASCII string "accept-encoding" is to be converted to an ASN.1 octet string. The length of the string is 15 octets. Since
+                  15 is less than 128, the length prefix is simply a single octet with the value 15 (0x0f). 
+               </p>
+               <div id="rfc.figure.u.1"></div>
+               <p>Hex dump of the resulting ASN.1 octet string:</p><pre>0000000 0f61 6363 6570 742d | 656e 636f 6469 6e67 | .accept-encoding
+	    </pre></div>
+            <div id="octet.string.example.2">
+               <h3 id="rfc.section.2.1.2"><a href="#rfc.section.2.1.2">2.1.2</a>&nbsp;<a href="#octet.string.example.2">Example 2 (length 33)</a></h3>
+               <p id="rfc.section.2.1.2.p.1">The ASCII string "gzip;q=1.0, identity;q=0.5, *;q=0" is to be converted to an ASN.1 octet string. The length of the string
+                  is 33 octets. Since 33 is less than 128, the length prefix is simply a single octet with the value 33 (0x21). 
+               </p>
+               <div id="rfc.figure.u.2"></div>
+               <p>Hex dump of the resulting ASN.1 octet string:</p><pre>0000000 2167 7a69 703b 713d | 312e 302c 2069 6465 | !gzip;q=1.0, ide
+0000010 6e74 6974 793b 713d | 302e 352c 202a 3b71 | ntity;q=0.5, *;q
+0000020 3d30                |                     | =0
+	    </pre></div>
+            <div>
+               <h3 id="rfc.section.2.1.3"><a href="#rfc.section.2.1.3">2.1.3</a>&nbsp;Example 3 (length 128)
+               </h3>
+               <p id="rfc.section.2.1.3.p.1">The string of octets 0x00 0x01 ... 0x7d 0x7f is to be converted to an ASN.1 octet string. The number of octets is 128. Since
+                  128 equals 128, the first octet of the length prefix has the most significant bit set to indicate the length prefix is longer
+                  than one octet. The remaining seven bits encode the number of additional octets necessary to represent the value 128 as a
+                  big endian unsigned integer. Since encoding 128 requires one octet, the seven remaining bits encode the value 1 (0x01). The
+                  second octet encodes the value 128 (0x80). 
+               </p>
+               <div id="rfc.figure.u.3"></div>
+               <p>Hex dump of the resulting ASN.1 octet string:</p><pre>0000000 8180 0001 0203 0405 | 0607 0809 0a0b 0c0d | ................
+0000010 0e0f 1011 1213 1415 | 1617 1819 1a1b 1c1d | ................
+0000020 1e1f 2021 2223 2425 | 2627 2829 2a2b 2c2d | .. !"#$%&amp;'()*+,-
+0000030 2e2f 3031 3233 3435 | 3637 3839 3a3b 3c3d | ./0123456789:;&lt;=
+0000040 3e3f 4041 4243 4445 | 4647 4849 4a4b 4c4d | &gt;?@ABCDEFGHIJKLM
+0000050 4e4f 5051 5253 5455 | 5657 5859 5a5b 5c5d | NOPQRSTUVWXYZ[\]
+0000060 5e5f 6061 6263 6465 | 6667 6869 6a6b 6c6d | ^_`abcdefghijklm
+0000070 6e6f 7071 7273 7475 | 7677 7879 7a7b 7c7d | nopqrstuvwxyz{|}
+0000080 7e7f                |                     | ~.
+	    </pre></div>
+            <div>
+               <h3 id="rfc.section.2.1.4"><a href="#rfc.section.2.1.4">2.1.4</a>&nbsp;Example 4 (length 258)
+               </h3>
+               <p id="rfc.section.2.1.4.p.1">The string of octets 0x00 0x01 ... 0xfe 0xff 0x00 0x01 is to be converted to an ASN.1 octet string. The number of octets is
+                  258. Since 258 is greater than 128, the first octet of the length prefix has the most significant bit set to indicate the
+                  length prefix is longer than one octet. The remaining seven bits encode the number of additional octets necessary to represent
+                  the value 258 as a big endian unsigned integer. Since encoding 258 requires two octets, the seven remaining bits encode the
+                  value 2 (0x02). The second and third octets encode the value 258 (0x01 0x02). 
+               </p>
+               <div id="rfc.figure.u.4"></div>
+               <p>Hex dump of the resulting ASN.1 octet string:</p><pre>000000 8201 0200 0102 0304 | 0506 0708 090a 0b0c | ................
+000010 0d0e 0f10 1112 1314 | 1516 1718 191a 1b1c | ................
+000020 1d1e 1f20 2122 2324 | 2526 2728 292a 2b2c | ... !"#$%&amp;'()*+,
+000030 2d2e 2f30 3132 3334 | 3536 3738 393a 3b3c | -./0123456789:;&lt;
+000040 3d3e 3f40 4142 4344 | 4546 4748 494a 4b4c | =&gt;?@ABCDEFGHIJKL
+000050 4d4e 4f50 5152 5354 | 5556 5758 595a 5b5c | MNOPQRSTUVWXYZ[\
+000060 5d5e 5f60 6162 6364 | 6566 6768 696a 6b6c | ]^_`abcdefghijkl
+000070 6d6e 6f70 7172 7374 | 7576 7778 797a 7b7c | mnopqrstuvwxyz{|
+000080 7d7e 7f80 8182 8384 | 8586 8788 898a 8b8c | ................
+000090 8d8e 8f90 9192 9394 | 9596 9798 999a 9b9c | ................
+0000a0 9d9e 9fa0 a1a2 a3a4 | a5a6 a7a8 a9aa abac | ................
+0000b0 adae afb0 b1b2 b3b4 | b5b6 b7b8 b9ba bbbc | ................
+0000c0 bdbe bfc0 c1c2 c3c4 | c5c6 c7c8 c9ca cbcc | ................
+0000d0 cdce cfd0 d1d2 d3d4 | d5d6 d7d8 d9da dbdc | ................
+0000e0 ddde dfe0 e1e2 e3e4 | e5e6 e7e8 e9ea ebec | ................
+0000f0 edee eff0 f1f2 f3f4 | f5f6 f7f8 f9fa fbfc | ................
+000100 fdfe ff00 01        |                     | ................
+	    </pre></div>
+         </div>
+      </div>
+      <div id="tokenization.rules">
+         <h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a>&nbsp;<a href="#tokenization.rules">EZFLATE Tokenization Rules</a></h1>
+         <p id="rfc.section.3.p.1">EZFLATE is itself agnostic to tokenization methods and delimiter sets. Appropriate tokenization rules and delimiter sets depend
+            on the type of data to be compressed. For HTTP/2 header data, each field-name and field-value are tokenized separately.
+         </p>
+         <div>
+            <h2 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1</a>&nbsp;Header Name Tokenization
+            </h2>
+            <p id="rfc.section.3.1.p.1">Since header field names are typically static, it is not beneficial to tokenize field names. Therefore field names are fed
+               to the EZFLATE compressor as a single token, including the ASN.1 length prefix.
+            </p>
+         </div>
+         <div>
+            <h2 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2</a>&nbsp;Header Value Tokenization
+            </h2>
+            <p id="rfc.section.3.2.p.1">Field values, on the other hand, have varying values of staticity ranging from very static (e.g. :scheme, user-agent) to semi-static
+               (e.g. accept, accept-encoding) to very dynamic (e.g. :path, date). Field values MAY be tokenized with following set of delimiters: 
+            </p>
+            <div id="delimiters"></div>
+            <div id="rfc.figure.1"></div><pre>	      { ' ', '\t', ';', ',' }
+	    </pre><p class="figure">Figure 1</p>
+            <p> Additionally, the set of headers { ":path", "location", "content-location" } MAY instead be tokenized with the following set
+               of delimiters: 
+            </p>
+            <div id="path.delimiters"></div>
+            <div id="rfc.figure.2"></div>
+            <p>Special token delimiters for header values containing a path:</p><pre>	      { '/', '?', '&amp;', '=' }
+	    </pre><p class="figure">Figure 2</p>
+            <p id="rfc.section.3.2.p.2">The ASN.1 length prefix MAY be treated as a delimiter and therefore treated as a separate token.</p>
+            <p id="rfc.section.3.2.p.3">Finally, note that per Section 3.2 of <a href="#EZFLATE"><cite title="EZFLATE: Token-based DEFLATE Compression">[EZFLATE]</cite></a>, a sequence of consecutive delimiters are to be treated as a single unit (e.g. as one token). For examle, see <a href="#token.4">Figure&nbsp;3</a> and <a href="#token.8">Figure&nbsp;4</a>, where the consecutive delimiter characters ',' and ' ', are treated as a single token ", ".
+            </p>
+         </div>
+         <div>
+            <h2 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3</a>&nbsp;Tokenization Example
+            </h2>
+            <p id="rfc.section.3.3.p.1">The following is an example of converting an HTTP header name-value pair into ASN.1 length prefixed octet strings (see <a href="#detailed.header.format" title="Detailed Header Format">Section&nbsp;2</a> and then tokenizing the octet string based on the tokenization rules.
+            </p>
+            <p id="rfc.section.3.3.p.2">The following header is to be encoded: </p>
+            <div id="rfc.figure.u.5"></div><pre>accept-encoding: gzip;q=1.0, identity;q=0.5, *;q=0
+	    </pre><p> First the field-name and field-value are converted to ASN.1 octet strings by adding the appropriate length prefixes (see <a href="#octet.string.example.1" title="Example 1 (length 15)">Section&nbsp;2.1.1</a> and <a href="#octet.string.example.1" title="Example 1 (length 15)">Section&nbsp;2.1.1</a>). 
+            </p>
+            <div id="rfc.figure.u.6"></div>
+            <p>Hex dump of the header converted to ASN.1 octet strings:</p><pre>0000000 0f61 6363 6570 742d | 656e 636f 6469 6e67 | .accept-encoding
+0000010 2167 7a69 703b 713d | 312e 302c 2069 6465 | !gzip;q=1.0, ide
+0000020 6e74 6974 793b 713d | 302e 352c 202a 3b71 | ntity;q=0.5, *;q
+0000030 3d30                |                     | =0
+	    </pre><p> Next, the length-prefixed header name is taken as a single token. </p>
+            <div id="rfc.figure.u.7"></div>
+            <p>Hex dump of the header name token:</p><pre>0000000 0f61 6363 6570 742d | 656e 636f 6469 6e67 | .accept-encoding
+	    </pre><p> Finally, the length-prefixed header value is tokenized according to the rules in <a href="#tokenization.rules" title="EZFLATE Tokenization Rules">Section&nbsp;3</a>. The following is a hex dump of each of the eleven tokens. 
+            </p>
+            <div id="rfc.figure.u.8"></div>
+            <p>Token 1:</p><pre>0000010 2167 7a69 70        |                     | !gzip
+	    </pre><p> </p>
+            <div id="rfc.figure.u.9"></div>
+            <p>Token 2:</p><pre>0000010             3b      |                     |      ;
+	    </pre><p> </p>
+            <div id="rfc.figure.u.10"></div>
+            <p>Token 3:</p><pre>0000010                713d | 312e 30             |       q=1.0
+	    </pre><p> </p>
+            <div id="token.4"></div>
+            <div id="rfc.figure.3"></div>
+            <p>Token 4:</p><pre>0000010                     |        2c 20        |            ,
+	    </pre><p class="figure">Figure 3</p>
+            <p> </p>
+            <div id="rfc.figure.u.11"></div>
+            <p>Token 5:</p><pre>0000010                     |             69 6465 |              ide
+0000020 6e74 6974 79        |                     | ntity
+	    </pre><p> </p>
+            <div id="rfc.figure.u.12"></div>
+            <p>Token 6:</p><pre>0000020             3b      |                     |      ;
+	    </pre><p> </p>
+            <div id="rfc.figure.u.13"></div>
+            <p>Token 7:</p><pre>0000020                713d | 302e 35             |       q=0.5
+	    </pre><p> </p>
+            <div id="token.8"></div>
+            <div id="rfc.figure.4"></div>
+            <p>Token 8:</p><pre>0000020                     |        2c 20        |            ,
+	    </pre><p class="figure">Figure 4</p>
+            <p> </p>
+            <div id="rfc.figure.u.14"></div>
+            <p>Token 9:</p><pre>0000020                     |             2a      |              *
+	    </pre><p> </p>
+            <div id="rfc.figure.u.15"></div>
+            <p>Token 10:</p><pre>0000020                     |                3b   |               ;
+	    </pre><p> </p>
+            <div id="rfc.figure.u.16"></div>
+            <p>Token 11:</p><pre>0000020                     |                  71 |                q
+0000030 3d30                |                     | =0
+	    </pre></div>
+         <div id="sub-tokenization">
+            <h2 id="rfc.section.3.4"><a href="#rfc.section.3.4">3.4</a>&nbsp;<a href="#sub-tokenization">Sub-Tokenization</a></h2>
+            <p id="rfc.section.3.4.p.1">The DEFLATE <a href="#DEFLATE"><cite title="DEFLATE Compressed Data Format Specification version 1.3">[DEFLATE]</cite></a> format has a fixed maximum length of 258 octets for matches (see Section 3.2.5 of <a href="#DEFLATE"><cite title="DEFLATE Compressed Data Format Specification version 1.3">[DEFLATE]</cite></a>). As such, tokens with length L greater than 258 octets SHOULD be sub-tokenized into sub-tokens as follows. The number of
+               sub-tokens N MUST be N = (L + 257) / 258 (integer division). If N &gt; 2, the first N - 2 sub-tokens MUST be 258 octets in length.
+               In all cases, the final two sub-tokens MUST have length greater than or equal to 129 (258 / 2). Let R be the remaining length
+               for the final two tokens. The length of the first remaining token is L[N - 1] = R - R / 2 and the length of the second remaining
+               token is L[N] = R / 2 (where the index is 1..N). Alternatively, tokens with length L greater than 258 octets may simply be
+               emitted as literals.
+            </p>
+            <p id="rfc.section.3.4.p.2">Consider the following examples:</p>
+            <div>
+               <h3 id="rfc.section.3.4.1"><a href="#rfc.section.3.4.1">3.4.1</a>&nbsp;Sub-Tokenization Example 1 (1292 octet token)
+               </h3>
+               <p id="rfc.section.3.4.1.p.1">A token T, 1292 octets in length, is to be sub-tokenized. </p>
+               <div id="rfc.figure.u.17"></div><pre class="inline">N  = (1292 + 257) / 258 = 1549 / 258 = 6
+L1 = 258
+L2 = 258
+L3 = 258
+L4 = 258
+R  = 1292 - 4 * 258 = 260
+L5 = 260 - 260 / 2  = 130
+L6 = 260 / 2        = 130
+</pre><p> Thus there are six sub-tokens. The first four sub-tokens are 258 octets in length. The final two sub-tokens are 130 octets
+                  in length.
+               </p>
+            </div>
+            <div>
+               <h3 id="rfc.section.3.4.2"><a href="#rfc.section.3.4.2">3.4.2</a>&nbsp;Sub-Tokenization Example 2 (516 octet token)
+               </h3>
+               <p id="rfc.section.3.4.2.p.1">A token T, 516 octets in length, is to be sub-tokenized. </p>
+               <div id="rfc.figure.u.18"></div><pre class="inline">N  = (516 + 257) / 258 = 773 / 258 = 2
+R  = 516
+L1 = R - R / 2 = 258
+L2 = R / 2     = 258
+</pre><p> Thus there are two sub-tokens. The two sub-tokens are 258 octets in length.</p>
+            </div>
+            <div>
+               <h3 id="rfc.section.3.4.3"><a href="#rfc.section.3.4.3">3.4.3</a>&nbsp;Sub-Tokenization Example 3 (259 octet token)
+               </h3>
+               <p id="rfc.section.3.4.3.p.1">A token T, 259 octets in length, is to be sub-tokenized. </p>
+               <div id="rfc.figure.u.19"></div><pre class="inline">N  = (259 + 257) / 258 = 516 / 258 = 2
+R  = 259
+L1 = R - R / 2 = 130
+L2 = R / 2     = 129
+</pre><p> Thus there are two sub-tokens. The length of the first sub-token is 130 octets. The length of the second sub-token is 129
+                  octets.
+               </p>
+            </div>
+         </div>
+      </div>
+      <div id="Security">
+         <h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a>&nbsp;<a href="#Security">Security Considerations</a></h1>
+         <p id="rfc.section.4.p.1">An EZFLATE compressor can act as an oracle to an attacker probing the compression context. However, the attacker can only
+            find out if the guess of the entire token is correct or not.
+         </p>
+         <p id="rfc.section.4.p.2">Still, an attacker could take advantage of this limited information for breaking low-entropy secrets using a brute-force attack.
+            A server usually has some protections against such brute-force attack. Here, the attack would target the client, where it
+            would be harder to detect. The attack would be even more dangerous if the attacker is able to prevent the traffic generated
+            by its brute-force attack from reaching the server.
+         </p>
+         <p id="rfc.section.4.p.3">To offer protection against such type of attacks, and endpoint MUST use non-compressed DEFLATE blocks (see Section 3.2.4 of <a href="#DEFLATE"><cite title="DEFLATE Compressed Data Format Specification version 1.3">[DEFLATE]</cite></a>) to prevent the compression of any header field whose value contains a secret which could be put at risk by a brute-force
+            attack.
+         </p>
+      </div>
+      <div>
+         <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a>&nbsp;Acknowledgements
+         </h1>
+         <p id="rfc.section.5.p.1">Roberto Peon and Hervé Ruellan.</p>
+      </div>
+      <h1 id="rfc.references"><a id="rfc.section.6" href="#rfc.section.6">6.</a> References
+      </h1>
+      <h2 id="rfc.references.1"><a href="#rfc.section.6.1" id="rfc.section.6.1">6.1</a> Normative References
+      </h2>
+      <table>
+         <tr>
+            <td class="reference"><b id="EZFLATE">[EZFLATE]</b></td>
+            <td class="top"><a href="mailto:k.morgan@iaea.org" title="&#xA;      International Atomic Energy Agency&#xA;    ">Morgan, K.</a> and <a href="mailto:c.brunhuber@iaea.org" title="&#xA;      International Atomic Energy Agency&#xA;    ">C. Brunhuber</a>, “<a href="http://tools.ietf.org/html/draft-morgan-ezflate">EZFLATE: Token-based DEFLATE Compression</a>”, Internet-Draft&nbsp;draft-morgan-ezflate (work in progress), June&nbsp;2014.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="X.208-88">[X.208-88]</b></td>
+            <td class="top">CCITT, “Recommendation X.208: Specification of Abstract Syntax Notation One (ASN.1)”, January&nbsp;1998.</td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="X.209-88">[X.209-88]</b></td>
+            <td class="top">CCITT, “Recommendation X.209: Specification of Basic Encoding Rules for Abstract Syntax Notation One”, January&nbsp;1998.</td>
+         </tr>
+      </table>
+      <h2 id="rfc.references.2"><a href="#rfc.section.6.2" id="rfc.section.6.2">6.2</a> Informative References
+      </h2>
+      <table>
+         <tr>
+            <td class="reference"><b id="CRIME">[CRIME]</b></td>
+            <td class="top">Rizzo, J. and T. Duong, “<a href="https://docs.google.com/a/twist.com/presentation/d/11eBmGiHbYcHR9gL5nDyZChu_-lCa2GizeuOfaLU2HOU/edit#slide=id.g1eb6c1b5_3_6">The CRIME Attack</a>”, September&nbsp;2012, &lt;<a href="https://docs.google.com/a/twist.com/presentation/d/11eBmGiHbYcHR9gL5nDyZChu_-lCa2GizeuOfaLU2HOU/edit#slide=id.g1eb6c1b5_3_6">https://docs.google.com/a/twist.com/presentation/d/11eBmGiHbYcHR9gL5nDyZChu_-lCa2GizeuOfaLU2HOU/edit#slide=id.g1eb6c1b5_3_6</a>&gt;.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="DEFLATE">[DEFLATE]</b></td>
+            <td class="top">Deutsch, P., “<a href="http://tools.ietf.org/html/rfc1951">DEFLATE Compressed Data Format Specification version 1.3</a>”, RFC&nbsp;1951, May&nbsp;1996.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="HTTP-p1">[HTTP-p1]</b></td>
+            <td class="top"><a href="mailto:fielding@gbiv.com" title="&#xA;      Adobe Systems Incorporated&#xA;    ">Fielding, R., Ed.</a> and <a href="mailto:julian.reschke@greenbytes.de" title="greenbytes GmbH">J. Reschke, Ed.</a>, “<a href="http://tools.ietf.org/html/draft-ietf-httpbis-p1-messaging-26">Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing</a>”, Internet-Draft&nbsp;draft-ietf-httpbis-p1-messaging-26 (work in progress), February&nbsp;2014.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="HTTP2">[HTTP2]</b></td>
+            <td class="top">Belshe, M., Peon, R., and M. Thomson, Ed., “<a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10">Hypertext Transfer Protocol version 2</a>”, Internet-Draft&nbsp;draft-ietf-httpbis-http2-10 (work in progress), February&nbsp;2014.
+            </td>
+         </tr>
+         <tr>
+            <td class="reference"><b id="SPDY">[SPDY]</b></td>
+            <td class="top">Belshe, M. and R. Peon, “<a href="http://tools.ietf.org/html/draft-mbelshe-httpbis-spdy-00">SPDY Protocol</a>”, Internet-Draft&nbsp;draft-mbelshe-httpbis-spdy-00 (work in progress), February&nbsp;2012.
+            </td>
+         </tr>
+      </table>
+      <div class="avoidbreak">
+         <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
+         <p><b>Keith Shearl Morgan</b><br>
+            	International Atomic Energy Agency
+            <br>Email: <a href="mailto:k.morgan@iaea.org">k.morgan@iaea.org</a></p>
+         <p><b>Christoph Brunhuber</b><br>
+            	International Atomic Energy Agency
+            <br>Email: <a href="mailto:c.brunhuber@iaea.org">c.brunhuber@iaea.org</a></p>
+      </div>
+   </body>
+</html>

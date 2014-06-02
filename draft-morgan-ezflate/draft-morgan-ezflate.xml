@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='lib/rfc2629.xslt' ?>
+
+<?rfc toc="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<?rfc linkmailto="no"?>
+<?rfc editing="no"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc rfcedstyle="yes"?>
+<?rfc-ext allow-markup-in-artwork="yes" ?>
+<?rfc-ext include-index="no" ?>
+
+<rfc category="std"
+     ipr="trust200902"
+     docName="draft-morgan-ezflate-latest"
+     x:maturity-level="proposed"
+     xmlns:x="http://purl.org/net/xml2rfc/ext">
+  <x:feedback template="mailto:k.morgan@iaea.org?subject={docname},%20%22{section}%22&amp;body=&lt;{ref}&gt;:"/>
+  <front>
+    <title abbrev="EZFLATE">EZFLATE: Token-based DEFLATE Compression</title>
+    <author initials="K." surname="Morgan" fullname="Keith Shearl Morgan">
+      <organization abbrev="IAEA">
+	International Atomic Energy Agency
+      </organization>
+      <address>
+	<email>k.morgan@iaea.org</email>
+      </address>
+    </author>
+    <author initials="C." surname="Brunhuber" fullname="Christoph Brunhuber">
+      <organization abbrev="IAEA">
+	International Atomic Energy Agency
+      </organization>
+      <address>
+	<email>c.brunhuber@iaea.org</email>
+      </address>
+    </author>
+
+    <date year="2014"/>
+    <area>Applications</area>
+    <workgroup>HTTPbis</workgroup>
+    <keyword>Compression</keyword>
+    <keyword>Security</keyword>
+    <abstract>
+      <t>
+	This specification defines EZFLATE, a token-based DEFLATE
+	compression algorithm for secure compression within
+	encrypted communication channels.
+      </t>
+    </abstract>
+
+    <note title="Editorial Note (To be removed by RFC Editor)">
+      <t>
+	Discussion of this draft takes place on the HTTPBIS working group
+	mailing list (ietf-http-wg@w3.org), which is archived at <eref
+	target="http://lists.w3.org/Archives/Public/ietf-http-wg/"/>.
+      </t>
+      <t>
+	Working Group information can be found at
+	<eref target="http://tools.ietf.org/wg/httpbis/"/>;
+      </t>
+      <!--
+	  <t>
+          The changes in this draft are summarized in <xref
+          target="changes.since.draft-morgan-ezflate-00"/>.
+	  </t>
+      -->
+    </note>
+  </front>
+
+  <middle>
+    <section title="Introduction" anchor="introduction">
+      <t>
+	DEFLATE <xref target="DEFLATE"/> is one of the most widely
+	used compression mechanisms. It forms the basis of ZIP <xref
+	target="ZIP"/>, GZIP <xref target="GZIP"/> and ZLIB <xref
+	target="ZLIB"/>. However, DEFLATE poses a security
+	vulnerability when messages comprised of secret and
+	attacker-controlled data are delivered through a secure
+	communication channel, as demonstrated by the CRIME <xref
+	target="CRIME"/> and BREACH <xref target="BREACH"/> attacks.
+      </t>
+      <t>
+	A key observation of the CRIME and BREACH attacks is that they
+	exploited the DEFLATE <spanx>algorithm</spanx> as described in
+	RFC 1951 <xref target="DEFLATE"/>, not the DEFLATE
+	<spanx>format</spanx> (also described in RFC 1951).
+      </t>
+      <t>
+	The first paragraph of Section 4, "Compression algorithm
+	details", in RFC 1951 explicitly states that the "deflate"
+	format is not tied to any particular algorithm. To quote, it
+	says, "While it is the intent of this document to define the
+	'deflate' compressed data format without reference to any
+	particular compression algorithm, the format is related to the
+	compressed formats produced by LZ77 ... it is strongly
+	recommended that the implementor of a compressor follow the
+	general algorithm presented here ... [however] a compressor
+	need not follow it in order to be compliant <xref
+	target="DEFLATE"/>."
+      </t>
+
+      <t>
+	This document describes EZFLATE, a token-based DEFLATE
+	<spanx>algorithm</spanx>. The key feature of the EZFLATE
+	algorithm (and primary difference to the algorithm described
+	in RFC 1951), is that LZ77 &lt;length, backward distance&gt;
+	tuples may only reference a duplicated token (octet string)
+	occurring in a previous block, up to 32K input bytes before,
+	if the current token exactly matches in length
+	<spanx>and</spanx> octet values. In other words, LZ77 tuples
+	must not reference partial matches, neither smaller nor
+	longer, occurring in a previous block.
+      </t>
+    </section>
+
+    <section title="Compression Attacks">
+      <section title="CRIME" anchor="crime">
+	<t>
+	  SPDY <xref target="SPDY"/> used DEFLATE <xref
+	  target="DEFLATE"/> to compress redundant HTTP <xref
+	  target="HTTP-p1"/> headers. The CRIME <xref target="CRIME"/>
+	  attack exploited DEFLATE to guess secret information
+	  contained in the HTTP request headers
+	  (e.g. "Cookies"). Since DEFLATE looks for matches
+	  character-by-character, the attackers were able to guess the
+	  secret one character at a time. Each failed guess resulted
+	  in a compressed block of size n. Correct guesses resulted in
+	  a compressed block of size m &lt; n.  For example, consider
+	  the following sample HTTP requests (taken from <xref
+	  target="CRIME"/>):
+	  <figure>
+	    <preamble>Attacker guesses the first character is 'a':</preamble>
+	    <artwork>
+<![CDATA[GET /twid=a
+Host: twitter.com
+User-Agent: Chrome
+Cookie: twid=secret]]>
+	    </artwork>
+	  </figure>
+	  ... (more guesses) ...
+	  <figure>
+	    <preamble>Attacker guesses the first character is 's':</preamble>
+	    <artwork>
+<![CDATA[GET /twid=s
+Host: twitter.com
+User-Agent: Chrome
+Cookie: twid=secret]]>
+	    </artwork>
+	  </figure>
+	  After guessing 's' is the first character of the secret, the
+	  attacker sees a corresponding increase in compression
+	  (i.e. decrease in length) indicating the guess is
+	  correct. The procedure is repeated until the entire secret
+	  is revealed.
+	</t>
+	<t>
+	  Although this is a brute-force attack of sorts, the average
+	  number of guesses required to extract a secret is
+	  considerably lower, and therefore tractable, thanks to being
+	  able to guess character by character. If the number of
+	  possible characters is 256, then on average it will require
+	  128 guesses per character to make a correct guess.  An
+	  n-character secret then only requires, on average, n * 128
+	  guesses to discover the secret. For example, a 12-character
+	  secret requires 12 * 128 = 1,536 guesses.  In many cases the
+	  set of possible characters is smaller than 256, reducing the
+	  search space even more!
+	</t>
+      </section>
+      <section title="BREACH">
+	<t>
+	  While CRIME exploited SPDY (and TLS compression too), BREACH
+	  <xref target="BREACH"/> exploited compression of HTTP <spanx
+	  >response bodies</spanx>. The mechanism of BREACH is similar
+	  to CRIME with slightly different details, therefore a
+	  detailed review of BREACH will not be given here.
+	</t>
+      </section>
+    </section>
+      
+    <section title="Tokenization">
+      <section title="&quot;Take a Bite out of CRIME&quot;">
+	<t>
+	  Taking a "bite out of crime" requires more than a security
+	  dog named McGruff <xref target="MCGRUFF"/>. EZFLATE fights
+	  CRIME by using token matching, rather than
+	  character-by-character matching, to make the search space
+	  for an attacker equivalent to a full brute-force attack. At
+	  that point there are easier ways to execute the brute-force
+	  attack.
+	</t>
+	<t>
+	  As stated in <xref target="introduction"/>, the key feature
+	  of the the EZFLATE algorithm (and primary difference to the
+	  algorithm described in RFC 1951), is that LZ77 &lt;length,
+	  backward distance&gt; tuples may only reference a duplicated
+	  token (octet string) if the current token and referenced
+	  token exactly match in length <spanx >and</spanx> octet
+	  values. By selecting appropriate tokenization rules,
+	  potential attackers are forced to guess n-character secrets
+	  n characters at a time rather than one character at a
+	  time. Taking the example from <xref
+	  target="crime"/>, a 12-character secret has a search space
+	  of 2<x:sup>12 * 8</x:sup> = 2<x:sup>96</x:sup> =
+	  79,228,162,514,264,337,593,543,950,336 possible secrets (of
+	  course, on average it would "only" take an attacker half
+	  that many guesses to discover the secret by brute
+	  force). Even a Base64-encoded 12-character secret has a
+	  search space of 64<x:sup>12</x:sup> = 4,722,366,482,869,645,213,696
+	  possible secrets.
+	</t>
+      </section>
+      <section title="Delimiters &amp; Tokenization Methods">
+	<t>
+	  The classic tokenization method splits an arbitrary-length
+	  octet string by a subset of octets that act as
+	  "delimiters". The result is typically a set of octet strings
+	  with the delimiter octets omitted.
+	</t>
+	<t>
+	  In the likely case where full reconstruction of the original
+	  octet string is desired, the delimiters obviously cannot be
+	  omitted. There are three different choices, outlined below,
+	  for keeping the delimiters. Each has their advantages and
+	  disadvantages. The best method for a particular data type
+	  can be discovered by experimenting. Note also that a
+	  sequence of consecutive delimiters are treated as a single
+	  unit.
+	</t>
+	<section title="Method 1: Keep Delimiters as Separate Tokens">
+	  <t>
+	    The first tokenization method simply keeps the
+	    delimiter(s) as separate tokens. For example, consider the
+	    following string of ASCII text to be tokenized by white
+	    space and puncuation.
+            <figure>
+	      <preamble>ASCII string to be tokenized:</preamble>
+	      <artwork>
+		"The quick; brown fox."
+	      </artwork>
+            </figure>
+            <figure>
+	      <preamble>Resulting token set after Method 1:</preamble>
+	      <artwork>
+		{ "The", " ", "quick", "; ", "brown", " ", "fox", "." }
+	      </artwork>
+            </figure>
+	  </t>
+	</section>
+	<section title="Method 2: Keep Delimiters with Preceding Token">
+	  <t>
+	    The second tokenization method keeps the delimiter(s) with
+	    the token which immediately precedes the delimiter(s).
+            <figure>
+	      <preamble>Resulting token set after Method 2:</preamble>
+	      <artwork>
+		{ "The ", "quick; ", "brown ", "fox." }
+	      </artwork>
+            </figure>
+	  </t>
+	</section>
+	<section title="Method 3: Keep Delimiters with Succeeding Token">
+	  <t>
+	    The third tokenization method keeps the delimiter(s) with
+	    the token which immediately succeeds the delimiter(s).
+            <figure>
+	      <preamble>Resulting token set after Method 2:</preamble>
+	      <artwork>
+		{ "The", " quick", "; brown", " fox", "." }
+	      </artwork>
+            </figure>
+	  </t>
+	</section>
+      </section>
+      <section title="Tokenization Rules">
+	<t>
+	  Note that EZFLATE is agnostic to tokenization methods and
+	  delimiter sets.  Appropriate tokenization rules and
+	  delimiter sets depend on the type of data to be
+	  compressed. For a particular data type, a global set of generally applicable
+	  tokenization rules ought to be selected if at all
+	  possible. This makes it easier for decompressors to verify,
+	  if desired, that the compressed data conforms to the rules
+	  and delimiter sets.  However, specialized rules might be
+	  necessary for special cases, particularly cases which might
+	  negatively affect security. The selection of appropriate
+	  rules and delimiter sets for a particular data type is
+	  beyond the scope of this document.
+	</t>
+      </section>
+    </section>
+
+    <section title="EZFLATE Compression Algorithm Details" anchor="algorithm">
+      <t>
+	The EZFLATE algorithm, described in this Section, is simply an alternate
+	to the algorithm described in Section 4 of <xref
+	target="DEFLATE"/>, it is not intended to replace that
+	algorithm, which provides better general-purpose compression.
+      </t>	
+      <t>
+	The compressor MUST always operates on a single token (octet
+	string).  The compressor uses a chained hash table to find
+	duplicated tokens. Any hash function may be used and the hash
+	function may operate on the entire octet string or any
+	subset. The compressor also uses a separate "length table" to
+	track the token lengths for each position in the input
+	window. At any given point during compression, let T be the
+	next token at position P with length L (not necessarily all
+	different octets, of course).  First, the compressor computes
+	the hash value of the token T and updates the hash table with
+	the hash value of T and updates the "length table" with L at
+	position P. Next, the compressor examines the hash chain for
+	the token T.  If the chain is empty, the compressor simply
+	emits the L literal octets of T. If the hash chain is not
+	empty, this indicates that the token T (or, if there was a
+	hash collision, some other octet string with the same hash
+	value) has occurred recently. The compressor follows the hash
+	chain to find the first entry within the current window which
+	has length L (stored in the length table) and is
+	octet-for-octet equivalent to the L octets in T. If an exact
+	match is found, the compressor may emit a LZ77 &lt;length,
+	backward distance&gt; tuple, where the length is L and the
+	backward distance is the position of the current token minus
+	the position of the exactly matching token. If no exact match
+	is found, the compressor simply emits the L literal octets of
+	T.
+      </t>
+      <t>
+	Just as stated in Section 4 of <xref
+	target="DEFLATE"/>, "the compressor searches the hash chains
+	starting with the most recent [octet] strings, to favor small
+	distances and thus take advantage of the Huffman 
+	encoding <xref target="HUFF"/>.  The hash chains are singly
+	linked. There are no deletions from the hash chains; the
+	algorithm simply discards matches that are too old.  To avoid
+	a worst-case situation, very long hash chains are arbitrarily
+	truncated at a certain length, determined by a run-time
+	parameter."
+      </t>
+      <t>
+	To improve overall compression, the compressor may optionally
+	defer emitting a match in order to find a longer match that
+	is a consecutive sequence of matching tokens. After a set of
+	one or more matches with positions Pm ... Pn have been found
+	for the current token T1 at position P1 with length L1, the compressor may defer emitting the match and
+	examine the next token T2 to determine if that token appears
+	at any of the positions Pm + L1 ... Pn + L1, i.e. directly
+	after any of the matches for T1. It is critical to note that
+	the same rules apply for checking matches of T2 at positions
+	Pm + L1 ... Pn + L1 as if the compressor were finding matches
+	for T2 using the hash chain. In particular the length of a
+	given token at position Pi + L1 must be equal to L2
+	<spanx>and</spanx> be octet-for-octet equivalent to the L2
+	octets in T2.  The compressor reduces the set
+	of matching positions in Pm ... Pn to only include those which
+	had an exact match for T2 at a given position Pi + L1. If one
+	or more matches remains, the process is repeated until either
+	the set of deferred matches cannot be extended by the next
+	token or the length of the next token is such that the overall
+	length of the match would exceed the maximum length of a match
+	(258 octets) allowed by the DEFLATE format (see Section 3.2.5
+	of <xref target="DEFLATE"/>). Note that the compressor must
+	keep enough information about the currently deferred
+	match(es), that once the final match is found the total length
+	and backward distance are known or can be computed. Once the
+	set of matches cannot be extended any longer, the compressor
+	returns to the normal process of searching for matches using
+	the hash table.
+      </t>
+      <t>
+	Just as stated in Section 4 of <xref
+	target="DEFLATE"/>, "the compressor terminates a block when it
+	determines that starting a new block with fresh trees would be
+	useful, or when the block size fills up the compressor's block
+	buffer."
+      </t>
+      <t>
+	A token T with length L less than the minimum length of a
+	match (3 octets) allowed by the DEFLATE format (see Section
+	3.2.5 of <xref target="DEFLATE"/>) is processed by simply
+	updating the "length table" and emiting the L literal
+	octets. These short tokens should, however, participate in
+	extending deferred matches. The same matching rules apply as
+	for matching tokens in all other situations, namely the length
+	of the potentially matching token stored in the "length table"
+	must be equal to L and the L octets of the stored token must
+	be octet-for-octet equivalent to the L octets in T.
+      </t>
+      <t>
+	Note that the formatting rules and static/dynamic Huffman
+	encoding rules in RFC 1951 <xref target="DEFLATE"/>, apply to
+	any implementation of the EZFLATE algorithm described here.
+      </t>
+    </section>
+    
+    <section anchor="Security" title="Security Considerations">
+      <t>
+	Care must be taken when implementing deferred matching such
+	that checking for matches of the current token against the
+	octets immediately following the deferred set of matches not
+	only checks for octet equivalency, but length equivalency as
+	well. If the length is not also checked, an attacker would be
+	able to perform character-by-character guessing by injecting
+	the token immediately preceding the secret, which in many
+	cases may be a known identifier.
+      </t>
+      <t>
+	[TODO: A lot of the remaining text is completely lifted from
+	the HPACK Internet Draft; re-write or give credit somehow.]
+      </t>
+      <t>
+	An EZFLATE compressor can still act as an oracle to an
+	attacker probing the compression context. However, the
+	attacker can only find out if the guess of the entire token
+	is correct or not.
+      </t>
+      <t>
+	Still, an attacker could take advantage of this limited
+	information for breaking low-entropy secrets using a
+	brute-force attack. A server usually has some protections
+	against such brute-force attack. Here, the attack would target
+	the client, where it would be harder to detect. The attack
+	would be even more dangerous if the attacker is able to
+	prevent the traffic generated by its brute-force attack from
+	reaching the server.
+      </t>
+      <t>
+	To offer protection against such type of attacks, users of
+	an EZFLATE compressor SHOULD use non-compressed DEFLATE
+	blocks (see Section 3.2.4 of <xref target="DEFLATE"/>)
+	disable compression of any low-entropy secrets which could
+	be put at risk by a brute-force attack.
+      </t>
+      <t>
+	There is currently no known threat taking advantage of the
+	use of a fixed Huffman encoding. A study has shown that
+	using a fixed Huffman encoding table created an
+	information leakage, however this same study concluded
+	that an attacker could not take advantage of this
+	information leakage to recover any meaningful amount of
+	information (see <xref target="PETAL"/>).
+      </t>
+    </section>
+
+    <section title="Acknowledgements">
+      <t>
+	Roberto Peon and Hervé Ruellan.
+      </t>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <reference anchor="DEFLATE">
+	<front>
+	  <title>DEFLATE Compressed Data Format Specification version 1.3</title>
+	  <author initials="P." surname="Deutsch" fullname="L. Peter Deutsch">
+	    <organization>Aladdin Enterprises</organization>
+	  </author>
+	  <date month="May" year="1996"/>
+	</front>
+	<seriesInfo name="RFC" value="1951"/>
+      </reference>
+    </references>
+
+    <references title="Informative References">
+      <reference anchor="SPDY">
+	<front>
+	  <title>SPDY Protocol</title>
+	  <author initials="M." surname="Belshe" fullname="Mike Belshe">
+	    <organization>Twist</organization>
+	  </author>
+	  <author initials="R." surname="Peon" fullname="Roberto Peon">
+	    <organization>Google</organization>
+	  </author>
+	  <date month="February" year="2012"/>
+	</front>
+	<seriesInfo name="Internet-Draft" value="draft-mbelshe-httpbis-spdy-00"/>
+      </reference>
+      <reference anchor="ZLIB">
+	<front>
+	  <title>ZLIB Compressed Data Format Specification version 3.3</title>
+	  <author initials="P." surname="Deutsch" fullname="L. Peter Deutsch">
+	    <organization>Aladdin Enterprises</organization>
+	  </author>
+	  <date month="May" year="1996"/>
+	</front>
+	<seriesInfo name="RFC" value="1950"/>
+      </reference>
+      <reference anchor="GZIP">
+	<front>
+	  <title>GZIP file format specification version 4.3</title>
+	  <author initials="P." surname="Deutsch" fullname="L. Peter Deutsch">
+	    <organization>Aladdin Enterprises</organization>
+	  </author>
+	  <date month="May" year="1996"/>
+	</front>
+	<seriesInfo name="RFC" value="1951"/>
+      </reference>
+      <reference anchor="ZIP" target="http://www.pkware.com/documents/casestudies/APPNOTE.TXT">
+	<front>
+	  <title>.ZIP File Format Specification</title>
+	  <author initials="P." surname="Katz" fullname="Phil Katz">
+	  </author>
+	  <date month="September" year="2012"/>
+	</front>
+      </reference>
+      <reference anchor="CRIME" target="https://docs.google.com/a/twist.com/presentation/d/11eBmGiHbYcHR9gL5nDyZChu_-lCa2GizeuOfaLU2HOU/edit#slide=id.g1eb6c1b5_3_6">
+	<front>
+	  <title>The CRIME Attack</title>
+	  <author initials="J." surname="Rizzo" fullname="Juliano Rizzo"></author>
+	  <author initials="T." surname="Duong" fullname="Thai Duong"></author>
+	  <date month="September" year="2012"/>
+	</front>
+      </reference>
+      <reference anchor="BREACH" target="http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf">
+	<front>
+	  <title>BREACH: REVIVING THE CRIME ATTACK</title>
+	  <author initials="Y." surname="Gluck" fullname="Yoel Gluck"></author>
+	  <date month="July" year="2013"/>
+	</front>
+      </reference>
+      <reference anchor="HTTP-p1">
+	<front>
+	  <title>
+	  Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing</title>
+	  <author fullname="Roy T. Fielding" initials="R." role="editor" surname="Fielding">
+	    <organization abbrev="Adobe">Adobe Systems Incorporated</organization>
+	    <address><email>fielding@gbiv.com</email></address>
+	  </author>
+	  <author fullname="Julian F. Reschke" initials="J. F." role="editor" surname="Reschke">
+	    <organization abbrev="greenbytes">greenbytes GmbH</organization>
+	    <address><email>julian.reschke@greenbytes.de</email></address>
+	  </author>
+	  <date month="February" year="2014" />
+	</front>
+	<seriesInfo name="Internet-Draft" value="draft-ietf-httpbis-p1-messaging-26" />
+      </reference>
+      <reference anchor="MCGRUFF" target="http://www.ncpc.org/about/about-mcgruff">
+	<front>	  
+	  <title>About McGruff</title>
+	  <author fullname="McGruff" initials="M." role="spokesdog" surname="McGruff">
+	    <organization>National Crime Prevention Council</organization>
+	  </author>
+	  <date year="2014"/>
+	</front>
+      </reference>
+      <reference anchor="HUFF" target="http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=4051119">
+	<front>
+	  <title>A Method for the Construction of Minimum Redundancy Codes</title>
+	  <author surname="Huffman" initials="D. A." fullname="David A. Huffman"/>
+	  <date month="September" year="1952"/>
+	</front>
+	<seriesInfo name="Proceedings of the Institute of Radio Engineers" value="Volume 40, Number 9, pp. 1098-1101"/>
+      </reference>
+      <reference anchor="PETAL" target="http://www.pdl.cmu.edu/PDL-FTP/associated/CMU-PDL-13-106.pdf">
+	<front>
+	  <title>PETAL: Preset Encoding Table Information
+	  Leakage</title>
+	  <author surname="Tan" initials="J." fullname="Jiaqi Tan"/>
+	  <author surname="Nahata" initials="J."
+		  fullname="Jayvardhan Nahata"/>
+	  <date month="April" year="2013"/>
+	</front>
+      </reference>
+    </references>
+<!--
+    <section title="Change Log (to be removed by RFC Editor before publication)">
+      <section title="Since draft-ietf-httpbis-header-compression-00">
+	<t>
+	  <list>
+	    <t>Fixed bug</t>
+	  </list>
+	</t>
+      </section>
+    </section>
+-->
+<!-- example-end -->
+  </back>
+</rfc>
+<!--
+  vim:et:tw=78:sw=4:
+ -->
